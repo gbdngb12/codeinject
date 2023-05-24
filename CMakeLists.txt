@@ -4,7 +4,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory("binary")
+add_subdirectory("include")
 #add_subdirectory("inject")
+
 
 # Set Test Mode Option
 option(TEST_CASE "Build with test case" ON)
