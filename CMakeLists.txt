@@ -10,7 +10,7 @@ add_subdirectory("binary")
 option(TEST_CASE "Build with test case" ON)
 
 if(TEST_CASE)
-    add_subdirectory("test")
+    add_subdirectory("test_code")
 endif()
 
 if(!TEST_CASE)

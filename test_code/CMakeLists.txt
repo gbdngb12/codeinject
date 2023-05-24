@@ -1,4 +1,4 @@
-project(test)
+project(test_code)
 
 find_package(Catch2 3 REQUIRED)
 # These tests can use the Catch2-provided main
