@@ -1,14 +1,25 @@
 #include "binary.h"
-
+#include <fcntl.h>
+//#include <cstdio>
+#include <ranges>
+#include <span>
 #include <utility>
 
 namespace codeinject::binary {
+FileDescriptor::~FileDescriptor() {
+    //close(m_fd);
+}
 
 FileDescriptor::FileDescriptor(std::string fname) : m_fname{std::move(fname)}, m_file_stream{m_fname} {
     if (!m_file_stream) {
         std::cerr << "open error" << m_fname << std::endl;
         exit(1);
     }
+}
+
+
+std::string FileDescriptor::get_file_name() const noexcept {
+    return m_fname;
 }
 
 int FileDescriptor::write_data(std::vector<uint8_t> data, int pos) {
@@ -93,83 +104,274 @@ void BinaryParser::open_bfd() {
     }
 }
 
-//bfd* BinaryParser::get_bfd_handler() const noexcept {
-//    if (!m_bfd_h) {
-//        return m_bfd_h;
-//    } else {
-//        exit(1);
-//    }
-//}
+template <typename T>
+BaseBinary<T>::BaseBinary(std::string fname, bfd* bfd_h, BinaryType binary_type) : FileDescriptor(fname), m_binary_type{std::move(binary_type)}, m_bfd_h{std::move(bfd_h)} {
+    parse_section();
+}
 
 template <typename T>
-BaseBinary<T>::BaseBinary(std::string fname, bfd* bfd_h, BinaryType binary_type) : FileDescriptor(fname), m_bfd_h{bfd_h}, m_binary_type{binary_type} {
-    parse_section();
-    parse_section_header();
+template <typename K>
+K BaseBinary<T>::vec_to_struct(std::vector<uint8_t>&& data) {
+    const auto* dataPtr = reinterpret_cast<const std::byte*>(data.data());
+    const auto* struct_data = std::bit_cast<const K*>(dataPtr);
+    return K{*struct_data};
 }
 
 template <typename T>
 void BaseBinary<T>::parse_section() {
-    std::cout << "section 정보를 파싱한다." << std::endl;
+    for (asection* bfd_sec = m_bfd_h->sections; bfd_sec; bfd_sec = bfd_sec->next) {
+        unsigned int bfd_flags = bfd_sec->flags;
+        if (!(bfd_flags & (SEC_CODE | SEC_DATA))) {
+            continue;
+        }
+        auto secname = bfd_section_name(bfd_sec);
+        /*
+        //const char* secname;
 
+        //vma = bfd_section_vma(bfd_sec);
+        //size = bfd_section_size(bfd_sec);
+        //secname = bfd_section_name(bfd_sec);
+        //if (!secname)
+        //    secname = "<unnamed>";
 
+        //bin->sections.push_back(Section());
+        //sec = &bin->sections.back();
+
+        //sec->binary = bin;
+        //sec->name = std::string(secname);
+        //sec->type = sectype;
+        //sec->vma = vma;
+        //sec->size = size;
+        //sec->bytes = (uint8_t*)malloc(size);
+        //if (!sec->bytes) {
+        //    fprintf(stderr, "out of memory\n");
+        //    return -1;
+        //}*/
+
+        auto size = bfd_section_size(bfd_sec);
+        std::vector<uint8_t> bytes(size);
+
+        if (!bfd_get_section_contents(m_bfd_h, bfd_sec, bytes.data(), 0, size)) {
+            std::cerr << "failed to read section" << secname << bfd_errmsg(bfd_get_error()) << std::endl;
+            exit(1);
+        }
+        Section<T> sec;
+        sec.m_bytes = std::move(bytes);
+        m_sections.push_back(std::move(sec));
+    }
 }
 
 template <typename T>
-void BaseBinary<T>::parse_section_header() {
-    std::cout << "section header 정보를 파싱한다." << std::endl;
+void BaseBinary<T>::set_section_header(std::vector<uint8_t>&& data) {
+    auto n = m_sections.size();
+    auto retSpan = std::span<uint8_t>(data.data(), data.size());
+    auto secHeaderSpan = std::span<T>(reinterpret_cast<T*>(std::move(retSpan.data())), n);
 
-}
-
-//BinaryType BinaryParser::get_binary_type() const noexcept {
-//    return m_binary_type;
-//}
-
-template <typename T, typename U, typename V>
-void ElfBinary<T, U, V>::parse_header_helper() {
-    // std::cout << static_cast<int>(this->m_binary_type) << "elf parse!" << std::endl;
+    int index = 0;
+    for (auto&& sec : m_sections) {
+        sec.m_section_header = std::move(secHeaderSpan[index++]);
+    }
 }
 
 template <typename T, typename U, typename V>
-void ElfBinary<T, U, V>::parse_section_helper() {
-    // std::cout << static_cast<int>(this->m_binary_type) << "elf parse!" << std::endl;
+void ElfBinary<T, U, V>::parse_every_thing() {
+    // 각 바이너리의 구조체에 맞게 모든 값을 파싱한다.
+    if constexpr (std::is_same_v<T, Elf32_Shdr> || std::is_same_v<T, Elf64_Shdr>) {
+        // 1. elf header를 파싱한다.
+        parse_elf_header();
+        // 2. program header를 파싱한다.
+        parse_program_header();
+        // 3. section header를 파싱한다.
+        parse_section_header();
+        // 4. 실제 section들의 정보를 파싱한다.
+    } else {
+        std::cerr << "Unknown section header" << std::endl;
+        exit(1);
+    }
 }
 
 template <typename T, typename U, typename V>
-void ElfBinary<T, U, V>::parse_section_header_helper() {
-    // std::cout << static_cast<int>(this->m_binary_type) << "elf parse!" << std::endl;
+void ElfBinary<T, U, V>::parse_elf_header() {
+    if constexpr(std::is_same_v<U, Elf32_Ehdr> || std::is_same_v<U, Elf64_Ehdr>) {
+        GElf_Ehdr ehdr;
+        gelf_getehdr(m_elf, &ehdr);
+        memcpy(&m_elf_header, &ehdr, sizeof(U));
+    } else {
+        std::cerr << "Unkown elf header" << std::endl;
+    }
+}
+
+template <typename T, typename U, typename V>
+void ElfBinary<T, U, V>::parse_program_header() {
+    if constexpr(std::is_same_v<V, Elf32_Phdr> || std::is_same_v<V, Elf64_Phdr>) {
+        GElf_Phdr phdr;
+        int number_of_program_header = m_elf_header.e_phnum;
+        for(int i = 0; i < number_of_program_header; i++) {
+            gelf_getphdr(m_elf,i, &phdr);
+            V program_header{};
+            memcpy(&program_header, &phdr, sizeof(V));
+            m_program_header.push_back(std::move(program_header));
+        }
+    } else {
+        std::cerr << "Unkown elf header" << std::endl;
+    }
+}
+
+template <typename T, typename U, typename V>
+void ElfBinary<T, U, V>::parse_section_header() {
+    if constexpr(std::is_same_v<T, Elf32_Shdr> || std::is_same_v<T, Elf64_Shdr>) {
+        const char* s;
+        GElf_Shdr shdr;
+        Elf_Scn *scn;
+        size_t shstrndx;
+        int index = 0;
+        if(elf_getshdrstrndx(m_elf, &shstrndx) < 0) {
+            std::cerr << "Failed to get string table section index" << std::endl;
+            exit(1);
+        }
+        scn = nullptr;
+        while((scn = elf_nextscn(m_elf, scn))) {
+            if(!gelf_getshdr(scn, &shdr)) {
+                std::cerr << "Failed to get section header" << std::endl;
+                exit(1);
+            }
+            T section_header{};
+            s = elf_strptr(m_elf, shstrndx, shdr.sh_name);
+            memcpy(&section_header, &shdr, sizeof(T));
+            this->m_sections[index++].m_section_header = std::move(section_header);
+        }
+    } else {
+        std::cerr << "Unkown elf header" << std::endl;
+    }
+    
+}
+
+template <typename T, typename U, typename V>
+void ElfBinary<T, U, V>::parse_section() {
+    // 추가적으로 section 파싱.. 아마 안씀
+}
+
+template <typename T, typename U, typename V>
+ElfBinary<T, U, V>::~ElfBinary() {
+    close(this->m_fd);
+}
+
+template <typename T, typename U, typename V>
+void ElfBinary<T, U, V>::libelf_open() {
+    // libelf를 위한 값들을 연다.
+    if (elf_version(EV_CURRENT) == EV_NONE) {
+        std::cerr <<  "ELF library initialization failed: " << elf_errmsg(-1) << std::endl;
+        exit(1);
+    }
+    // 읽기 전용으로 사용
+    // C레거시 코드를 사용하기위해 임시적으로 읽기모드로 fd 생성
+    
+    this->m_fd = open(this->get_file_name().c_str(), O_RDONLY);
+    if(this->m_fd == -1) {
+        std::cerr << "Failed to open file" << std::endl;
+        exit(1);
+    }
+    
+    m_elf = elf_begin(this->m_fd, ELF_C_READ, NULL);
+    if(!m_elf) {
+        std::cerr <<  "Failed to open ELF file "<< std::endl;
+        exit(1);
+    }
+
+    if(elf_kind(m_elf) != ELF_K_ELF) {
+        std::cerr << "not an ELF executable" << std::endl;
+        exit(1);
+    }
 }
 
 template <typename T, typename U, typename V>
 ElfBinary<T, U, V>::ElfBinary(std::string fname, bfd* bfd_h, BinaryType binary_type) : BaseBinary<T>(std::move(fname), bfd_h, binary_type) {
-    parse_header_helper();
-    parse_section_helper();
-    parse_section_header_helper();
+    // libelf를 위한것들을 연다.
+    libelf_open();
+    // 나머지 모든것들을 파싱한다.    
+    parse_every_thing();
 }
-
-
 
 template <typename T, typename U, typename V>
 PeBinary<T, U, V>::PeBinary(std::string fname, bfd* bfd_h, BinaryType binary_type) : BaseBinary<T>(std::move(fname), bfd_h, binary_type) {
-    parse_header_helper();
-    parse_section_helper();
-    parse_section_header_helper();
+    parse_every_thing();
 }
 
 template <typename T, typename U, typename V>
-void PeBinary<T, U, V>::parse_header_helper() {
-    // std::cout << static_cast<int>(this->m_binary_type) << "pe parse!" << std::endl;
+void PeBinary<T, U, V>::parse_every_thing() {
+    // 구조체에 맞게 모든 값을 파싱한다.
+    // T is PE_SECTION_HEADER
+    if constexpr (std::is_same_v<T, PE_SECTION_HEADER>) {
+        // 1. 파일을 연다 -> 객체 생성하면서 이미 열려있음 m_file_stream으로 접근
+        // 2. DOS_HEADER를 파싱한다.
+        parse_dos_header();
+        // 3. PE_HEADER를 파싱한다.
+        parse_pe_header();
+        // 4. Section HEADER를 파싱한다.
+        parse_section_header();
+        // 5. Section들의 실제 정보를 파싱한다.
+        parse_section();
+    } else {
+        std::cerr << "unknown section header" << std::endl;
+        exit(1);
+    }
 }
 
 template <typename T, typename U, typename V>
-void PeBinary<T, U, V>::parse_section_header_helper() {
-    // std::cout << static_cast<int>(this->m_binary_type) << "pe parse!" << std::endl;
+void PeBinary<T, U, V>::parse_dos_header() {
+    // PE DOS Header를 파싱한다.
+    // U is PE_DOS_HEADER
+    if constexpr (std::is_same_v<U, PE_DOS_HEADER>) {
+        m_dos_header = this->template vec_to_struct<U>(std::move(this->read_data(0, sizeof(U))));
+    } else {
+        std::cerr << "Unkown dos header" << std::endl;
+        exit(1);
+    }
 }
 
 template <typename T, typename U, typename V>
-void PeBinary<T, U, V>::parse_section_helper() {
-    // std::cout << static_cast<int>(this->m_binary_type) << "pe parse!" << std::endl;
+void PeBinary<T, U, V>::parse_pe_header() {
+    // PE HEADER를 파싱한다.
+    // V is PE_HEADER
+    if constexpr (std::is_same_v<V, PE32_HEADERS> || std::is_same_v<V, PE64_HEADERS>) {
+        m_pe_header = this->template vec_to_struct<V>(std::move(this->read_data(m_dos_header.e_lfanew, sizeof(V))));
+        m_number_of_image_data_dir = m_pe_header.OptionalHeader.NumberOfRvaAndSizes;
+    } else {
+        std::cerr << "Unknown pe header" << std::endl;
+        exit(1);
+    }
 }
 
+// 현재 IMAGE_DATA_DIRECTORY는 파싱하지 않았음
+template <typename T, typename U, typename V>
+void PeBinary<T, U, V>::parse_section_header() {
+    // PE section header를 파싱한다.
+    // T is PE_SECTION_HEADER
+    if constexpr (std::is_same_v<T, PE_SECTION_HEADER>) {
+        auto n = m_pe_header.FileHeader.NumberOfSections;
+        auto section_header_file_offset = m_dos_header.e_lfanew /*PE Header File offset*/
+                                          + sizeof(V)           /*sizeof(PE Header without IMAGE_DATA_DIRECTORY)*/
+                                          + (sizeof(IMAGE_DATA_DIRECTORY) * m_number_of_image_data_dir);
+        /**
+         * @brief section header 정보를 설정한다.
+         *
+         */
+        this->set_section_header(std::move(this->read_data(section_header_file_offset, sizeof(T) * n)));
+    } else {
+        std::cerr << "Unkown section header" << std::endl;
+        exit(1);
+    }
+}
+
+template <typename T, typename U, typename V>
+void PeBinary<T, U, V>::parse_section() {
+    // 추가적으로 section 파싱..
+}
+
+template <typename T>
+BaseBinary<T>::~BaseBinary() {
+    bfd_close(m_bfd_h);
+}
 
 std::variant<elf32_ptr, elf64_ptr, pe32_ptr, pe64_ptr> BinaryParser::create_binary() {
     if (m_binary_type == BinaryType::ELF32) {

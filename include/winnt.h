@@ -1,7 +1,10 @@
 typedef unsigned short WORD;
-typedef unsigned long DWORD;
+typedef unsigned int DWORD;
 typedef unsigned char BYTE;
 typedef unsigned long long ULONGLONG;
+
+// PE 코드 삽입을 위해 필요한 정보 
+// section header의 마지막 파일 오프셋 - 첫번째 Section의 코드 >= 40(IMAGE_SECTION_HEADER의 크기)
 
 typedef struct _IMAGE_DOS_HEADER {
     WORD e_magic;    /* 00: MZ Header signature */
@@ -27,12 +30,12 @@ typedef struct _IMAGE_DOS_HEADER {
 
 typedef struct _IMAGE_FILE_HEADER {
     WORD Machine;
-    WORD NumberOfSections;
+    WORD NumberOfSections; /* PE Inject를 위해 필요한 정보 : 섹션을 추가하기 위해서 */
     DWORD TimeDateStamp;
     DWORD PointerToSymbolTable;
     DWORD NumberOfSymbols;
     WORD SizeOfOptionalHeader;
-    WORD Characteristics;
+    WORD Characteristics; /* PE Inject를 위해 필요한 정보 : 보안 Flag 삭제 */
 } IMAGE_FILE_HEADER, *PIMAGE_FILE_HEADER;
 
 typedef struct _IMAGE_DATA_DIRECTORY {
@@ -40,7 +43,7 @@ typedef struct _IMAGE_DATA_DIRECTORY {
     DWORD Size;
 } IMAGE_DATA_DIRECTORY, *PIMAGE_DATA_DIRECTORY;
 
-#define IMAGE_NUMBEROF_DIRECTORY_ENTRIES 16
+//#define IMAGE_NUMBEROF_DIRECTORY_ENTRIES 16
 typedef struct _IMAGE_OPTIONAL_HEADER64 {
     WORD Magic; /* 0x20b */
     BYTE MajorLinkerVersion;
@@ -48,11 +51,11 @@ typedef struct _IMAGE_OPTIONAL_HEADER64 {
     DWORD SizeOfCode;
     DWORD SizeOfInitializedData;
     DWORD SizeOfUninitializedData;
-    DWORD AddressOfEntryPoint;
-    DWORD BaseOfCode;
+    DWORD AddressOfEntryPoint; /* PE Inject를 위해 필요한 정보 : Entry Point */
+    DWORD BaseOfCode; 
     ULONGLONG ImageBase;
-    DWORD SectionAlignment;
-    DWORD FileAlignment;
+    DWORD SectionAlignment; /* PE Inject를 위해 필요한 정보 : 가상 메모리에 section을 추가할때 시작, 끝 지점 메모리 값 계산을 위해 */
+    DWORD FileAlignment;    /* PE Inject를 위해 필요한 정보 : 파일에서 section을 추가할때 시작, 끝 지점 파일 오프셋 계산을 위해 */
     WORD MajorOperatingSystemVersion;
     WORD MinorOperatingSystemVersion;
     WORD MajorImageVersion;
@@ -60,7 +63,7 @@ typedef struct _IMAGE_OPTIONAL_HEADER64 {
     WORD MajorSubsystemVersion;
     WORD MinorSubsystemVersion;
     DWORD Win32VersionValue;
-    DWORD SizeOfImage;
+    DWORD SizeOfImage; /* PE Inject를 위해 필요한 정보 : 가상 메모리에 로드됐을때의 전체 메모리 크기 */
     DWORD SizeOfHeaders;
     DWORD CheckSum;
     WORD Subsystem;
@@ -71,7 +74,7 @@ typedef struct _IMAGE_OPTIONAL_HEADER64 {
     ULONGLONG SizeOfHeapCommit;
     DWORD LoaderFlags;
     DWORD NumberOfRvaAndSizes;
-    IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
+    //IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
 } IMAGE_OPTIONAL_HEADER64, *PIMAGE_OPTIONAL_HEADER64;
 
 typedef struct _IMAGE_NT_HEADERS64 {
@@ -89,15 +92,15 @@ typedef struct _IMAGE_OPTIONAL_HEADER {
     DWORD SizeOfCode;
     DWORD SizeOfInitializedData;
     DWORD SizeOfUninitializedData;
-    DWORD AddressOfEntryPoint; /* 0x10 */
+    DWORD AddressOfEntryPoint; /* 0x10, PE Inject를 위해 필요한 정보 : Entry Point  */
     DWORD BaseOfCode;
     DWORD BaseOfData;
 
     /* NT additional fields */
 
     DWORD ImageBase;
-    DWORD SectionAlignment; /* 0x20 */
-    DWORD FileAlignment;
+    DWORD SectionAlignment; /* 0x20, PE Inject를 위해 필요한 정보 : 가상 메모리에 section을 추가할때 시작, 끝 지점 메모리 값 계산을 위해 */
+    DWORD FileAlignment; /* PE Inject를 위해 필요한 정보 : 파일에서 section을 추가할때 시작, 끝 지점 파일 오프셋 계산을 위해 */
     WORD MajorOperatingSystemVersion;
     WORD MinorOperatingSystemVersion;
     WORD MajorImageVersion;
@@ -105,7 +108,7 @@ typedef struct _IMAGE_OPTIONAL_HEADER {
     WORD MajorSubsystemVersion; /* 0x30 */
     WORD MinorSubsystemVersion;
     DWORD Win32VersionValue;
-    DWORD SizeOfImage;
+    DWORD SizeOfImage; /* PE Inject를 위해 필요한 정보 : 가상 메모리에 로드됐을때의 전체 메모리 크기 */
     DWORD SizeOfHeaders;
     DWORD CheckSum; /* 0x40 */
     WORD Subsystem;
@@ -116,8 +119,7 @@ typedef struct _IMAGE_OPTIONAL_HEADER {
     DWORD SizeOfHeapCommit;
     DWORD LoaderFlags;
     DWORD NumberOfRvaAndSizes;
-    IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES]; /* 0x60 */
-                                                                          /* 0xE0 */
+    //IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES]; /* 0x60 */                                                                    /* 0xE0 */
 } IMAGE_OPTIONAL_HEADER32, *PIMAGE_OPTIONAL_HEADER32;
 
 typedef struct _IMAGE_NT_HEADERS {
@@ -125,20 +127,23 @@ typedef struct _IMAGE_NT_HEADERS {
     IMAGE_FILE_HEADER FileHeader;           /* 0x04 */
     IMAGE_OPTIONAL_HEADER32 OptionalHeader; /* 0x18 */
 } IMAGE_NT_HEADERS32, PE32_HEADERS;
-
+/**
+ * @brief PE에 삽입할 섹션 헤더의 정보
+ * 
+ */
 #define IMAGE_SIZEOF_SHORT_NAME 8
 typedef struct _IMAGE_SECTION_HEADER {
     BYTE Name[IMAGE_SIZEOF_SHORT_NAME];
     union {
         DWORD PhysicalAddress;
-        DWORD VirtualSize;
+        DWORD VirtualSize; // PE inject를 위해 필요한 정보
     } Misc;
     DWORD VirtualAddress;
     DWORD SizeOfRawData;
-    DWORD PointerToRawData;
+    DWORD PointerToRawData; // PE inject를 위해 필요한 정보
     DWORD PointerToRelocations;
     DWORD PointerToLinenumbers;
     WORD NumberOfRelocations;
     WORD NumberOfLinenumbers;
-    DWORD Characteristics;
+    DWORD Characteristics; // PE inject를 위해 필요한 정보
 } IMAGE_SECTION_HEADER, PE_SECTION_HEADER;

@@ -20,7 +20,7 @@ TEST_CASE("FileDescriptor") {
 }
 
 TEST_CASE("BinaryParser") {
-    BinaryParser binary{"/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/pe_64"};
+    BinaryParser binary{"/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/elf_64_pie"};
     auto parsed_biary = binary.create_binary();
     std::visit([](auto&& ptr) {
         using T = std::decay_t<decltype(ptr)>;
@@ -29,6 +29,7 @@ TEST_CASE("BinaryParser") {
 
         } else if constexpr (std::is_same_v<T, elf64_ptr>) {
             std::cout << "elf64" << std::endl;
+            
 
         } else if constexpr (std::is_same_v<T, pe64_ptr>) {
             std::cout << ptr.get()->m_dos_header.e_magic << std::endl;

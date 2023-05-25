@@ -1,5 +1,5 @@
 project(binary)
-
+set(GCC_COVERAGE_LINK_FLAGS "-lelf")
 add_library(${PROJECT_NAME} "binary.cpp")
 
 find_library(libbfd bfd REQUIRED)
@@ -19,4 +19,5 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC
         ${libbfd}
         header
+        "/usr/lib/x86_64-linux-gnu/libelf.so"
 )
