@@ -2,8 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 #include <iostream>
-#include <vector>
 #include <variant>
+#include <vector>
 
 using namespace std;
 using namespace codeinject::binary;
@@ -20,25 +20,22 @@ TEST_CASE("FileDescriptor") {
 }
 
 TEST_CASE("BinaryParser") {
-    BinaryParser binary{"/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/elf_64_pie"};
-    auto parsed_biary = binary.create_binary();
-    std::visit([](auto&& ptr) {
-        using T = std::decay_t<decltype(ptr)>;
-        if constexpr (std::is_same_v<T, elf32_ptr>) {
-            std::cout << "elf32!!" << std::endl;
-
-        } else if constexpr (std::is_same_v<T, elf64_ptr>) {
-            std::cout << "elf64" << std::endl;
-            
-
-        } else if constexpr (std::is_same_v<T, pe64_ptr>) {
-            std::cout << ptr.get()->m_dos_header.e_magic << std::endl;
-            std::cout << "pe64" << std::endl;
-
-        } else if constexpr (std::is_same_v<T, pe32_ptr>) {
-
-            std::cout << "pe32" << std::endl;
-        } 
-    },
-               parsed_biary);
+    BinaryParser binary{"/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/pe_64"};
+    auto parsed_binary = binary.create_binary();
+    // binary_type에 접근하여 해당 타입을 출력하는 방법
+     if (std::holds_alternative<elf32_ptr>(parsed_binary)) {
+        std::cout << "Binary type: ELF32" << std::endl;
+        // need to test
+    } else if (std::holds_alternative<elf64_ptr>(parsed_binary)) {
+        std::cout << "Binary type: ELF64" << std::endl;
+        CodeBinary<Elf64_Shdr> codebinary{"/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/linux_backdoor.bin"};
+        auto code = codebinary.get_code();
+    } else if (std::holds_alternative<pe32_ptr>(parsed_binary)) {
+        std::cout << "Binary type: PE32" << std::endl;
+        // need to test
+    } else if (std::holds_alternative<pe64_ptr>(parsed_binary)) {
+        std::cout << "Binary type: PE64" << std::endl;
+        CodeBinary<PE_SECTION_HEADER> codebinary{"/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/win_backdoor.bin"};
+        auto code = codebinary.get_code();
+    }
 }

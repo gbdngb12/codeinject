@@ -1,7 +1,7 @@
 #pragma once
 #include <bfd.h>
-#include <libelf.h>
 #include <gelf.h>
+#include <libelf.h>
 
 #include <fstream>
 #include <iostream>
@@ -58,23 +58,25 @@ class FileDescriptor {
 
     ///**
     // * @brief low file descriptor
-    // * 
+    // *
     // */
-    //int m_fd;
-    //std::FILE* m_file;
+    // int m_fd;
+    // std::FILE* m_file;
     /**
      * @brief
      *
      */
     std::fstream m_file_stream;
-    protected:
+
+   protected:
     /**
      * @brief 미래에 사용할수도있으니 남겨놓는다. low level 관리를 위해
-     * 
+     *
      */
     int m_fd;
+
    public:
-   virtual ~FileDescriptor();
+    virtual ~FileDescriptor();
     std::string get_file_name() const noexcept;
     /**
      * @brief 파일을 연다.
@@ -88,7 +90,6 @@ class FileDescriptor {
      *
      * @param fstream
      */
-    // FileDescriptor(std::fstream fstream);
     /**
      * @brief pos 위치에 string을 쓴다.
      *
@@ -106,6 +107,11 @@ class FileDescriptor {
      * @return std::vector<uint8_t>
      */
     std::vector<uint8_t> read_data(int pos, int size);
+
+    int get_file_size() {
+        m_file_stream.seekg(0, std::ios::end);
+        return m_file_stream.tellg();
+    }
 };
 
 /**
@@ -121,14 +127,6 @@ class SectionHeader {
      *
      */
     T m_section_header;
-    /**
-     * @brief section header를 가져온다.
-     *
-     * @return T
-     */
-    T get_section_header() const {
-        return m_section_header;
-    }
 };
 
 /**
@@ -144,25 +142,53 @@ class Section : public SectionHeader<T> {
      *
      */
     std::vector<uint8_t> m_bytes;
+    std::string m_section_name;
 };
 
 /**
- * @brief 현재 로드한 바이너리의 section의 코드, 이름, vma, vsize, fileoffset을 설정하는 클래스
+ * @brief bfd를 다루는 클래스
  *
- * @tparam T SectionHeader의 구조
  */
-template <typename T>
-class BaseBinary : public FileDescriptor {
+class Bfd : public FileDescriptor {
    public:
-    virtual ~BaseBinary();
+    virtual ~Bfd();
     /**
-     * @brief file name과 bfd핸들러를 받아 Binary 객체를 생성
+     * @brief 파일로 bfd 핸들러를 연다.
+     *
+     * @param fname
+     */
+    Bfd(std::string fname);
+    /**
+     * @brief 미리 생성된 bfd 핸들러가 있으면 저장한다.
      *
      * @param fname
      * @param bfd_h
      */
-    BaseBinary(std::string fname, bfd* bfd_h, BinaryType binary_type);
+    Bfd(std::string fname, std::shared_ptr<bfd> bfd_h);
+    std::shared_ptr<bfd> m_bfd_h;
+    inline static int bfd_inited = 0;
+    virtual void open_bfd();
+};
+
+/**
+ * @brief 섹션의 실제 정보만 다루는 클래스
+ *
+ * @tparam T
+ */
+template <typename T>
+class SectionBinary : public Bfd {
+   public:
+    SectionBinary(std::string fname, std::shared_ptr<bfd> bfd_h);
     /**
+     * @brief 미리 생성된 bfd handler가 없는 경우
+     *
+     * @param fname
+     */
+    SectionBinary(std::string fname);
+
+    std::vector<Section<T>> m_sections;
+    virtual void parse_section();  // 실제 section의 data를 파싱한다.
+        /**
      * @brief vector<uint8_t>를 구조체로 바꾸는 함수
      *
      * @tparam K 바꾸고 싶은 구조체
@@ -171,33 +197,31 @@ class BaseBinary : public FileDescriptor {
      */
     template <typename K>
     K vec_to_struct(std::vector<uint8_t>&& data);
+};
 
+/**
+ * @brief 현재 로드한 바이너리의 section의 코드, 이름, vma, vsize, fileoffset을 설정하는 클래스
+ *
+ * @tparam T SectionHeader의 구조
+ */
+template <typename T>
+class BaseBinary : public SectionBinary<T> {
+   public:
+    virtual ~BaseBinary() = default;
     /**
-     * @brief 섹션들의 실제 정보를 파싱한다.
+     * @brief file name과 bfd핸들러를 받아 Binary 객체를 생성
      *
+     * @param fname
+     * @param bfd_h
      */
-    virtual void parse_section();
+    BaseBinary(std::string fname, std::shared_ptr<bfd> bfd_h, BinaryType binary_type);
 
-    /**
-     * @brief section의 정보
-     *
-     */
-    std::vector<Section<T>> m_sections;
+
     /**
      * @brief 각 바이너리에 맞게 모든 구조체 값을 파싱한다.
      *
      */
     virtual void parse_every_thing() = 0;
-    /**
-     * @brief m_sections의 SectionHeader를 순회하면서 값을 저장한다.
-     * 
-     */
-    virtual void set_section_header(std::vector<uint8_t>&& data);
-    /**
-     * @brief 혹시모를 미래를 위해 bfd 핸들러는 남겨 놓는다.
-     *
-     */
-    bfd* m_bfd_h;
     BinaryType m_binary_type;
 };
 
@@ -212,7 +236,9 @@ template <typename T, typename U, typename V>
 class ElfBinary : public BaseBinary<T> {
    public:
     virtual ~ElfBinary();
-    ElfBinary(std::string fname, bfd* bfd_h, BinaryType binary_type);
+    // ElfBinary(std::string fname, BinaryType binary_type);
+    ElfBinary(std::string fname, std::shared_ptr<bfd> bfd_h, BinaryType binary_type);
+
     void libelf_open();
     /**
      * @brief elf header
@@ -231,32 +257,26 @@ class ElfBinary : public BaseBinary<T> {
     virtual void parse_every_thing() override;
     /**
      * @brief elf의 elf header를 파싱한다.
-     * 
+     *
      */
     void parse_elf_header();
     /**
      * @brief elf의 program header를 파싱한다.
-     * 
+     *
      */
     void parse_program_header();
     /**
      * @brief elf의 section header를 파싱한다.
-     * 
+     *
      */
     void parse_section_header();
 
     /**
-     * @brief elf바이너리의 추가적인 섹션 정보를 파싱한다.
+     * @brief libelf를 이용하기 위한 자료
      *
      */
-    virtual void parse_section() override;
-
-    /**
-     * @brief libelf를 이용하기 위한 자료
-     * 
-     */
-    Elf* m_elf;// elf descriptor
-    //GElf_Ehdr m_ehdr; // elf header
+    Elf* m_elf;  // elf descriptor
+    // GElf_Ehdr m_ehdr; // elf header
 };
 
 /**
@@ -269,7 +289,8 @@ class ElfBinary : public BaseBinary<T> {
 template <typename T, typename U, typename V>
 class PeBinary : public BaseBinary<T> {
    public:
-    PeBinary(std::string fname, bfd* bfd_h, BinaryType binary_type);
+    PeBinary() = default;
+    PeBinary(std::string fname, std::shared_ptr<bfd> bfd_h, BinaryType binary_type);
     /**
      * @brief DOS Header
      *
@@ -301,25 +322,28 @@ class PeBinary : public BaseBinary<T> {
      *
      */
     void parse_section_header();
+
+    int m_number_of_image_data_dir;
+
     /**
-     * @brief pe바이너리의 추가적인 section 정보를 파싱한다.
+     * @brief m_sections의 SectionHeader를 순회하면서 값을 저장한다.
      *
      */
-    virtual void parse_section() override;
-    int m_number_of_image_data_dir;
+    virtual void set_section_header(std::vector<uint8_t>& data);
 };
 
-class BinaryParser {
-   private:
-    void open_bfd();
+template <typename T>
+class CodeBinary : public SectionBinary<T> {
+   public:
+    CodeBinary(std::string fname);
+    virtual void open_bfd() override;
+    std::vector<uint8_t> get_code() const;
+};
 
+class BinaryParser : public Bfd {
    public:
     BinaryParser(std::string fname);
     std::variant<elf32_ptr, elf64_ptr, pe32_ptr, pe64_ptr> create_binary();
-    bfd* m_bfd_h;
-    std::string m_fname;
-    // bfd* get_bfd_handler() const noexcept;
-    // BinaryType get_binary_type() const noexcept;
     BinaryType m_binary_type;
 };
 
