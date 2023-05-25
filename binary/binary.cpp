@@ -467,8 +467,44 @@ std::vector<uint8_t> CodeBinary<T>::get_code() const {
     return this->m_sections.back().m_bytes;
 }
 
+template <typename P>
+PeInject<P>::PeInject(P ptr) : m_binary{std::move(ptr)} {}
+
+template <typename P>
+ElfInject<P>::ElfInject(P ptr) : m_binary{std::move(ptr)} {}
+
+template <typename P>
+void PeInject<P>::inject_code(std::vector<uint8_t> code) {
+    // 구현 내용 추가
+    std::cout << "PeInject::inject_code called" << std::endl;
+    
+}
+
+template <typename P>
+void PeInject<P>::add_section(std::string sec_name) {
+    // 구현 내용 추가
+    std::cout << "PeInject::add_section called" << std::endl;
+
+}
+
+template <typename P>
+void ElfInject<P>::inject_code(std::vector<uint8_t> code) {
+    // 구현 내용 추가
+    std::cout << "ElfInject::inject_code called" << std::endl;
+}
+
+template <typename P>
+void ElfInject<P>::add_section(std::string sec_name) {
+    // 구현 내용 추가
+    std::cout << "ElfInject::add_section called" << std::endl;
+}
+
 }  // namespace codeinject::binary
 // 템플릿 클래스 인스턴스화
+template class codeinject::binary::ElfInject<codeinject::binary::elf32_ptr>;
+template class codeinject::binary::ElfInject<codeinject::binary::elf64_ptr>;
+template class codeinject::binary::PeInject<codeinject::binary::pe32_ptr>;
+template class codeinject::binary::PeInject<codeinject::binary::pe64_ptr>;
 template class codeinject::binary::CodeBinary<Elf64_Shdr>;
 template class codeinject::binary::CodeBinary<PE_SECTION_HEADER>;
 template class codeinject::binary::PeBinary<PE_SECTION_HEADER, PE_DOS_HEADER, PE32_HEADERS>;

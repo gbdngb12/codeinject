@@ -188,7 +188,7 @@ class SectionBinary : public Bfd {
 
     std::vector<Section<T>> m_sections;
     virtual void parse_section();  // 실제 section의 data를 파싱한다.
-        /**
+    /**
      * @brief vector<uint8_t>를 구조체로 바꾸는 함수
      *
      * @tparam K 바꾸고 싶은 구조체
@@ -215,7 +215,6 @@ class BaseBinary : public SectionBinary<T> {
      * @param bfd_h
      */
     BaseBinary(std::string fname, std::shared_ptr<bfd> bfd_h, BinaryType binary_type);
-
 
     /**
      * @brief 각 바이너리에 맞게 모든 구조체 값을 파싱한다.
@@ -345,6 +344,31 @@ class BinaryParser : public Bfd {
     BinaryParser(std::string fname);
     std::variant<elf32_ptr, elf64_ptr, pe32_ptr, pe64_ptr> create_binary();
     BinaryType m_binary_type;
+};
+
+class CodeInject {
+   public:
+    CodeInject() = default;
+    virtual void inject_code(std::vector<uint8_t> code) = 0;
+    virtual void add_section(std::string sec_name) = 0;
+};
+
+template <typename P>
+class PeInject : public CodeInject {
+   public:
+    P m_binary;
+    PeInject(P ptr);
+    void inject_code(std::vector<uint8_t> code) override;
+    void add_section(std::string sec_name) override;
+};
+
+template <typename P>
+class ElfInject : public CodeInject {
+   public:
+    P m_binary;
+    ElfInject(P ptr);
+    void inject_code(std::vector<uint8_t> code) override;
+    void add_section(std::string sec_name) override;
 };
 
 };  // namespace codeinject::binary
