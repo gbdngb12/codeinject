@@ -1,12 +1,14 @@
 #include "binary.h"
-
+#include "CodeInject.h"
 #include <catch2/catch_all.hpp>
 #include <iostream>
 #include <variant>
 #include <vector>
+#include <iomanip>
 
 using namespace std;
 using namespace codeinject::binary;
+using namespace codeinject::inject;
 
 TEST_CASE("FileDescriptor") {
     FileDescriptor file{"/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/file_stream_test"};
@@ -23,7 +25,7 @@ TEST_CASE("BinaryParser") {
     BinaryParser open_binary{"/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/pe_64"};
     auto parsed_binary = open_binary.create_binary();
 
-    std::visit([](auto&& binary) {
+    std::visit([](auto& binary) {
         using T = std::decay_t<decltype(binary)>;
 
         if constexpr (std::is_same_v<T, elf32_ptr>) {
@@ -40,8 +42,12 @@ TEST_CASE("BinaryParser") {
             std::cout << "Binary type: PE64" << std::endl;
             CodeBinary<PE_SECTION_HEADER> codebinary{"/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/win_backdoor.bin"};
             auto code = codebinary.get_code();
-            PeInject<pe64_ptr> peinject{std::move(binary)};
-            peinject.inject_code(code);
+            for(auto&& c : code) {
+                std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(c) << " ";
+            }
+            //Section<PE_SECTION_HEADER> sec;
+            //PeInject<pe64_ptr> peinject{std::move(binary)};
+            //peinject.inject_code(code);
         }
     },
                parsed_binary);

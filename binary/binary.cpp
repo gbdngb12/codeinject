@@ -97,6 +97,15 @@ SectionBinary<T>::SectionBinary(std::string fname) : Bfd(std::move(fname)) {
 }
 
 template <typename T>
+Section<T>& SectionBinary<T>::operator[](std::string&& sec_name) {
+    for(auto& sec : m_sections) {
+        if(sec.m_section_name == sec_name) {
+            return sec;
+        }
+    }
+}
+
+template <typename T>
 void SectionBinary<T>::parse_section() {
     for (asection* bfd_sec = m_bfd_h->sections; bfd_sec; bfd_sec = bfd_sec->next) {
         unsigned int bfd_flags = bfd_sec->flags;
@@ -188,6 +197,16 @@ K SectionBinary<T>::vec_to_struct(std::vector<uint8_t>&& data) {
     return K{*struct_data};
 }
 
+template <typename T>
+template <typename K>
+std::vector<uint8_t> SectionBinary<T>::struct_to_vec(const K& data) {
+    std::vector<uint8_t> result(sizeof(K));
+    auto* dataPtr = reinterpret_cast<const uint8_t*>(&data);
+    std::copy(dataPtr, dataPtr + sizeof(K), result.data());
+    return result;
+}
+
+
 template <typename T, typename U, typename V>
 void ElfBinary<T, U, V>::parse_every_thing() {
     // 각 바이너리의 구조체에 맞게 모든 값을 파싱한다.
@@ -203,6 +222,12 @@ void ElfBinary<T, U, V>::parse_every_thing() {
         std::cerr << "Unknown section header" << std::endl;
         exit(1);
     }
+}
+
+template <typename T, typename U, typename V>
+Section<T>& ElfBinary<T, U, V>::operator=(Section<T>&& sec) {
+    //실제로 파일에 정보를 기록함
+    //없으면 추가함
 }
 
 template <typename T, typename U, typename V>
@@ -326,6 +351,28 @@ ElfBinary<T, U, V>::ElfBinary(std::string fname, std::shared_ptr<bfd> bfd_h, Bin
 template <typename T, typename U, typename V>
 PeBinary<T, U, V>::PeBinary(std::string fname, std::shared_ptr<bfd> bfd_h, BinaryType binary_type) : BaseBinary<T>(std::move(fname), bfd_h, binary_type) {
     parse_every_thing();
+}
+
+template <typename T, typename U, typename V>
+Section<T>& PeBinary<T, U, V>::operator=(Section<T>&& sec_data) {
+    // 실제로 파일에 정보를 기록함
+    // 없으면 추가함
+    auto section_header_file_offset = m_dos_header.e_lfanew /*PE Header File offset*/
+                                          + sizeof(V)           /*sizeof(PE Header without IMAGE_DATA_DIRECTORY)*/
+                                          + (sizeof(IMAGE_DATA_DIRECTORY) * m_number_of_image_data_dir);
+    int index = 0;
+    for(auto& sec : this->m_sections) {
+        if(sec.m_section_name == sec_data.m_section_name) {
+            sec = std::move(sec_data);
+            // 실제로 파일에 정보를 기록함
+            this->write_data(this->template struct_to_vec<T>(sec.m_section_header), section_header_file_offset + sizeof(T) * index);
+            return sec;
+        }
+        index++;
+    }
+    this->m_sections.push_back(std::move(sec_data));
+    // 실제로 파일에 정보를 기록함
+    return this->m_sections.back();
 }
 
 template <typename T, typename U, typename V>
@@ -467,44 +514,9 @@ std::vector<uint8_t> CodeBinary<T>::get_code() const {
     return this->m_sections.back().m_bytes;
 }
 
-template <typename P>
-PeInject<P>::PeInject(P ptr) : m_binary{std::move(ptr)} {}
-
-template <typename P>
-ElfInject<P>::ElfInject(P ptr) : m_binary{std::move(ptr)} {}
-
-template <typename P>
-void PeInject<P>::inject_code(std::vector<uint8_t> code) {
-    // 구현 내용 추가
-    std::cout << "PeInject::inject_code called" << std::endl;
-    
-}
-
-template <typename P>
-void PeInject<P>::add_section(std::string sec_name) {
-    // 구현 내용 추가
-    std::cout << "PeInject::add_section called" << std::endl;
-
-}
-
-template <typename P>
-void ElfInject<P>::inject_code(std::vector<uint8_t> code) {
-    // 구현 내용 추가
-    std::cout << "ElfInject::inject_code called" << std::endl;
-}
-
-template <typename P>
-void ElfInject<P>::add_section(std::string sec_name) {
-    // 구현 내용 추가
-    std::cout << "ElfInject::add_section called" << std::endl;
-}
 
 }  // namespace codeinject::binary
 // 템플릿 클래스 인스턴스화
-template class codeinject::binary::ElfInject<codeinject::binary::elf32_ptr>;
-template class codeinject::binary::ElfInject<codeinject::binary::elf64_ptr>;
-template class codeinject::binary::PeInject<codeinject::binary::pe32_ptr>;
-template class codeinject::binary::PeInject<codeinject::binary::pe64_ptr>;
 template class codeinject::binary::CodeBinary<Elf64_Shdr>;
 template class codeinject::binary::CodeBinary<PE_SECTION_HEADER>;
 template class codeinject::binary::PeBinary<PE_SECTION_HEADER, PE_DOS_HEADER, PE32_HEADERS>;

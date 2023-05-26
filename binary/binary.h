@@ -178,6 +178,20 @@ class Bfd : public FileDescriptor {
 template <typename T>
 class SectionBinary : public Bfd {
    public:
+    /**
+     * @brief Section을 가져옴
+     * 
+     * @param sec_name 
+     * @return Section<T>& 
+     */
+    virtual Section<T>& operator[](std::string&& sec_name);
+    /**
+     * @brief 실제 섹션의 내용을 변경함, 없으면 추가함
+     * 
+     * @param sec 
+     * @return Section<T>& 
+     */
+    virtual Section<T>& operator=(Section<T>&& sec) = 0;
     SectionBinary(std::string fname, std::shared_ptr<bfd> bfd_h);
     /**
      * @brief 미리 생성된 bfd handler가 없는 경우
@@ -197,6 +211,9 @@ class SectionBinary : public Bfd {
      */
     template <typename K>
     K vec_to_struct(std::vector<uint8_t>&& data);
+
+    template<typename K>
+    std::vector<uint8_t> struct_to_vec(const K& data);
 };
 
 /**
@@ -237,6 +254,9 @@ class ElfBinary : public BaseBinary<T> {
     virtual ~ElfBinary();
     // ElfBinary(std::string fname, BinaryType binary_type);
     ElfBinary(std::string fname, std::shared_ptr<bfd> bfd_h, BinaryType binary_type);
+
+
+    virtual Section<T>& operator=(Section<T>&& sec) override;
 
     void libelf_open();
     /**
@@ -290,6 +310,8 @@ class PeBinary : public BaseBinary<T> {
    public:
     PeBinary() = default;
     PeBinary(std::string fname, std::shared_ptr<bfd> bfd_h, BinaryType binary_type);
+
+    virtual Section<T>& operator=(Section<T>&& sec) override;
     /**
      * @brief DOS Header
      *
@@ -334,6 +356,8 @@ class PeBinary : public BaseBinary<T> {
 template <typename T>
 class CodeBinary : public SectionBinary<T> {
    public:
+    virtual Section<T>& operator=(Section<T>&& sec) override {
+    }
     CodeBinary(std::string fname);
     virtual void open_bfd() override;
     std::vector<uint8_t> get_code() const;
@@ -344,31 +368,6 @@ class BinaryParser : public Bfd {
     BinaryParser(std::string fname);
     std::variant<elf32_ptr, elf64_ptr, pe32_ptr, pe64_ptr> create_binary();
     BinaryType m_binary_type;
-};
-
-class CodeInject {
-   public:
-    CodeInject() = default;
-    virtual void inject_code(std::vector<uint8_t> code) = 0;
-    virtual void add_section(std::string sec_name) = 0;
-};
-
-template <typename P>
-class PeInject : public CodeInject {
-   public:
-    P m_binary;
-    PeInject(P ptr);
-    void inject_code(std::vector<uint8_t> code) override;
-    void add_section(std::string sec_name) override;
-};
-
-template <typename P>
-class ElfInject : public CodeInject {
-   public:
-    P m_binary;
-    ElfInject(P ptr);
-    void inject_code(std::vector<uint8_t> code) override;
-    void add_section(std::string sec_name) override;
 };
 
 };  // namespace codeinject::binary

@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory("binary")
 add_subdirectory("include")
-#add_subdirectory("inject")
+add_subdirectory("inject")
 
 
 # Set Test Mode Option
