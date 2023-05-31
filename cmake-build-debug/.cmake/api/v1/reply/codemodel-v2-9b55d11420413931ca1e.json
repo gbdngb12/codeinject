@@ -1,0 +1,195 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4
+					],
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.22"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "binary",
+					"jsonFile" : "directory-binary-Debug-1d1a6c104cc81c6c945b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.22"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "binary",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "include",
+					"jsonFile" : "directory-include-Debug-7ead17b99bffc88b66bb.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.22"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 2,
+					"source" : "include",
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"build" : "inject",
+					"jsonFile" : "directory-inject-Debug-10f48262fee357baaa40.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.22"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 3,
+					"source" : "inject",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "test_code",
+					"jsonFile" : "directory-test_code-Debug-09b0b19aa3151296dd5d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.22"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 4,
+					"source" : "test_code",
+					"targetIndexes" : 
+					[
+						1
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "codeinject"
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "binary",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "header",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						3
+					],
+					"name" : "inject",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						4
+					],
+					"name" : "get_code",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "binary::@6cbf18ddfabf6d61aeec",
+					"jsonFile" : "target-binary-Debug-6fd16ae0a4dfbcf9be9e.json",
+					"name" : "binary",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "get_code::@df0f889b69ebcef7c859",
+					"jsonFile" : "target-get_code-Debug-7d14ac8314c216bfb607.json",
+					"name" : "get_code",
+					"projectIndex" : 4
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "header::@14b3099d61bfdbeae804",
+					"jsonFile" : "target-header-Debug-a9295598d0fe499995a9.json",
+					"name" : "header",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "inject::@e99790cc9eefaad20ed0",
+					"jsonFile" : "target-inject-Debug-0943f61de21fa2efb73a.json",
+					"name" : "inject",
+					"projectIndex" : 3
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug",
+		"source" : "/home/dong/Downloads/elf_backdoor/backdoor/codeinject"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}

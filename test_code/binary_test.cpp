@@ -1,54 +1,33 @@
 #include "binary.h"
-#include "CodeInject.h"
 #include <catch2/catch_all.hpp>
 #include <iostream>
-#include <variant>
-#include <vector>
-#include <iomanip>
-
+#define test_file "/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/pe_64"
 using namespace std;
 using namespace codeinject::binary;
-using namespace codeinject::inject;
+
+
 
 TEST_CASE("FileDescriptor") {
-    FileDescriptor file{"/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/file_stream_test"};
-    auto ret = file.read_data(0, 10);
-    for (const auto& d : ret) {
-        cout << d;
-    }
-    std::vector<uint8_t> data{'\x12', '\x33', '\x55'};
-    file.write_data(data, 0);
-    std::cout << std::endl;
+  FileDescriptor file_descriptor{test_file};
+  auto struc = file_descriptor.read_struct<IMAGE_DOS_HEADER>(0, sizeof(IMAGE_DOS_HEADER));
+  std::cout << struc.e_lfanew << std::endl;
+}
+
+TEST_CASE("Bfd") {
+  Bfd bfd_test{test_file};
+
 }
 
 TEST_CASE("BinaryParser") {
-    BinaryParser open_binary{"/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/pe_64"};
-    auto parsed_binary = open_binary.create_binary();
+  BinaryParser binary{test_file};
+  //BaseBinary base{binary};
+  PeBinary<PE_SECTION_HEADER, PE_DOS_HEADER, PE64_HEADERS> pe_binary{binary};
+  pe_binary.parse_every_thing();
 
-    std::visit([](auto& binary) {
-        using T = std::decay_t<decltype(binary)>;
-
-        if constexpr (std::is_same_v<T, elf32_ptr>) {
-            std::cout << "Binary type: ELF32" << std::endl;
-            // need to test
-        } else if constexpr (std::is_same_v<T, elf64_ptr>) {
-            std::cout << "Binary type: ELF64" << std::endl;
-            CodeBinary<Elf64_Shdr> codebinary{"/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/linux_backdoor.bin"};
-            auto code = codebinary.get_code();
-        } else if constexpr (std::is_same_v<T, pe32_ptr>) {
-            std::cout << "Binary type: PE32" << std::endl;
-            // need to test
-        } else if constexpr (std::is_same_v<T, pe64_ptr>) {
-            std::cout << "Binary type: PE64" << std::endl;
-            CodeBinary<PE_SECTION_HEADER> codebinary{"/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/win_backdoor.bin"};
-            auto code = codebinary.get_code();
-            for(auto&& c : code) {
-                std::cout << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(c) << " ";
-            }
-            //Section<PE_SECTION_HEADER> sec;
-            //PeInject<pe64_ptr> peinject{std::move(binary)};
-            //peinject.inject_code(code);
-        }
-    },
-               parsed_binary);
+  Section<PE_SECTION_HEADER> sec;
+  memcpy(std::get<0>(sec.m_section_header).Name, "abcde\0\0\0", 8);
+  std::get<1>(sec.m_section_header) = 0x208;
+  std::get<2>(sec.m_section_header) = sizeof(PE_SECTION_HEADER);
+  sec.m_section = std::make_tuple(std::vector<uint8_t>{'\x00','\x01','\x02'}, 0x0400, 0x024800);
+  pe_binary.edit_section(".text", sec, EditMode::EDIT);
 }

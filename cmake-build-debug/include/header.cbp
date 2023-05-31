@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="header"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\binary\;CMake Files\include\;CMake Files\inject\;CMake Files\test_code\;CMake Files\..\;CMake Files\..\..\;CMake Files\..\..\..\;CMake Files\..\..\..\..\;CMake Files\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\;CMake Files\..\..\..\..\..\..\usr\;CMake Files\..\..\..\..\..\..\usr\local\;CMake Files\..\..\..\..\..\..\usr\local\lib\;CMake Files\..\..\..\..\..\..\usr\local\lib\cmake\;CMake Files\..\..\..\..\..\..\usr\local\lib\cmake\Catch2\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j16 -f &quot;/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/gmake -j16 -f &quot;/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j16 -f &quot;/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j16 -f &quot;/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="header">
+				<Option output="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include/libheader.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/include"/>
+					<Add directory="/usr/include/c++/11"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/11"/>
+					<Add directory="/usr/include/c++/11/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/11/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j16 -f &quot;/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include/Makefile&quot;  VERBOSE=1 header"/>
+					<CompileFile command="/usr/bin/gmake -j16 -f &quot;/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j16 -f &quot;/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j16 -f &quot;/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="header/fast">
+				<Option output="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include/libheader.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/include"/>
+					<Add directory="/usr/include/c++/11"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/11"/>
+					<Add directory="/usr/include/c++/11/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/11/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j16 -f &quot;/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include/Makefile&quot;  VERBOSE=1 header/fast"/>
+					<CompileFile command="/usr/bin/gmake -j16 -f &quot;/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j16 -f &quot;/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j16 -f &quot;/home/dong/Downloads/elf_backdoor/backdoor/codeinject/cmake-build-debug/include/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/include/elf.h">
+			<Option target="header"/>
+		</Unit>
+		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/include/winnt.h">
+			<Option target="header"/>
+		</Unit>
+		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/binary/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\binary\"/>
+		</Unit>
+		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/include/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\include\"/>
+		</Unit>
+		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/inject/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\inject\"/>
+		</Unit>
+		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_code/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\test_code\"/>
+		</Unit>
+		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/../../../../../../usr/local/lib/cmake/Catch2/Catch2Config.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\usr\local\lib\cmake\Catch2\"/>
+		</Unit>
+		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/../../../../../../usr/local/lib/cmake/Catch2/Catch2ConfigVersion.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\usr\local\lib\cmake\Catch2\"/>
+		</Unit>
+		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/../../../../../../usr/local/lib/cmake/Catch2/Catch2Targets-noconfig.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\usr\local\lib\cmake\Catch2\"/>
+		</Unit>
+		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/../../../../../../usr/local/lib/cmake/Catch2/Catch2Targets.cmake">
+			<Option virtualFolder="CMake Files\..\..\..\..\..\..\usr\local\lib\cmake\Catch2\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
