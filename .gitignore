@@ -47,6 +47,7 @@ _deps
 #CMake build ignore
 build/
 [Bb][Uu][Ii][Ll][Dd]/
+cmake-build-debug/
 
 #vscode ignore
 .vscode/*
