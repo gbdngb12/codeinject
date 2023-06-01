@@ -1,5 +1,5 @@
 project(inject)
-add_library(${PROJECT_NAME} "CodeInject.cpp")
+add_library(${PROJECT_NAME} "inject.cpp")
 
 #find_library(libbfd bfd REQUIRED)
 #
@@ -9,7 +9,7 @@ add_library(${PROJECT_NAME} "CodeInject.cpp")
 #    message(STATUS "libbfd found! as ${libbfd}")
 #endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "CodeInject.h")
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "inject.h")
 
 # specify the include directory for the library
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -6,6 +6,10 @@
 #include <tuple>
 #include <bfd.h>
 #include <cstring>
+#include <libelf.h>
+#include <gelf.h>
+#include <fstream>
+#include <iostream>
 #define FMT_HEADER_ONLY
 #include "fmt/format.h"
 namespace std {
@@ -13,8 +17,10 @@ using fmt::format;
 using fmt::format_error;
 using fmt::formatter;
 }  // namespace std
+
 #include "winnt.h"
 #include "elf.h"
+
 
 namespace codeinject::binary {
 enum class BinaryType {
@@ -32,34 +38,36 @@ enum class EditMode {
 
 class FileDescriptor {
  public:
+  FileDescriptor(const FileDescriptor &) = delete;
+  FileDescriptor &operator=(const FileDescriptor &) = delete;
+  virtual ~FileDescriptor() = default;
+
   /**
    * 파일의 이름
    */
   std::string m_fname;
-  /**
-   * @brief 미래를 위해 사용되는 low level 파일 디스크립터
-   */
-  int m_fd = -1;
+
+  std::fstream m_file_stream;
 
   /**
    * S에 값을 읽는다.
-   * @tparam S 구조체 형식
+   * @tparam S 구조체 또는 vector
    * @param pos 읽을 위치
    * @param size 읽을 크기
    * @return 구조체
    */
   template<typename S>
-  S read_struct(int pos, int size);
+  S read_data(int pos, int size);
 
   /**
    * S에 값을 쓴다.
-   * @tparam S 구조체 형식
+   * @tparam S 구조체 또는 vector
    * @param pos 쓸 위치
    * @param size 쓸 크기
    * @param struct_data 구조체
    */
   template<typename S>
-  void write_struct(int pos, int size, S &&struct_data);
+  void write_data(int pos, int size, S &&struct_data);
 
   /**
    * 파일을 연다.
@@ -71,16 +79,14 @@ class FileDescriptor {
    */
   explicit FileDescriptor() = default;
 
-  /**
-   * fd를 닫는다.
-   */
-  virtual ~FileDescriptor();
 
   /**
    * 파일의 이름을 설정한다.
    * @param fname
    */
   void set_file_name(std::string fname);
+
+  int get_file_size();
 
 };
 
@@ -106,6 +112,7 @@ class Bfd : public FileDescriptor {
    */
   explicit Bfd(std::string fname, std::shared_ptr<bfd> bfd_h, BinaryType);
 
+  explicit Bfd(std::string fname, BinaryType);
   /**
    * bfd handler를 연다.
    */
@@ -156,14 +163,13 @@ class Section {
    * @param sec
    * @return
    */
-  Section<T>& operator=(Section<T>&& sec) noexcept = default;
+  Section<T> &operator=(Section<T> &&sec) noexcept = default;
 
-  Section(const Section<T>&) = default;              // Disabling copy constructor
-  Section<T>& operator=(const Section<T>&) = default;   // Disabling copy assignment operator
+  Section(const Section<T> &) = default;              // Disabling copy constructor
+  Section<T> &operator=(const Section<T> &) = default;   // Disabling copy assignment operator
   //Section& operator=(Section&&) = delete;        // Disabling move assignment operator
 
 };
-
 
 template<typename T>
 class BaseBinary : public Bfd {
@@ -188,7 +194,7 @@ class BaseBinary : public Bfd {
    * 실제 Section의 정보를 가져온다.
    * @return Section<T>의 참조
    */
-  Section<T>& get_section(std::string);
+  Section<T> &get_section(std::string);
   /**
    * 실제 Section의 정보를 수정한다.(파일에도 적용됨)
    * @param sec_name target Section의 이름
@@ -196,7 +202,7 @@ class BaseBinary : public Bfd {
    * @param mode 수정, 삽입
    * @return 수정한 Section<T>
    */
-  bool edit_section(std::string sec_name, const Section<T>& sec, EditMode mode);
+  virtual bool edit_section(std::string sec_name, const Section<T> &sec, EditMode mode) = 0;
 
 };
 
@@ -209,6 +215,7 @@ class BaseBinary : public Bfd {
 template<typename T, typename U, typename V>
 class PeBinary : public BaseBinary<T> {
  public:
+  PeBinary(PeBinary &&) = default;
   /**
    * DOS Header, file offset, file size
    */
@@ -220,7 +227,7 @@ class PeBinary : public BaseBinary<T> {
 
   virtual void parse_every_thing() override;
 
-  explicit PeBinary(const BinaryParser& parser);
+  explicit PeBinary(const BinaryParser &parser);
   /**
    * dos header를 파싱한다.
    */
@@ -234,6 +241,71 @@ class PeBinary : public BaseBinary<T> {
    */
   void parse_section();
 
+  virtual bool edit_section(std::string sec_name, const Section<T> &sec, EditMode mode) override;
+
+  /**
+   * PE HEADER를 수정한다.
+   * @param pe_header
+   * @return
+   */
+  bool edit_pe_header(const V &pe_header);
+
+  /**
+   * DOS HEADER를 수정한다.
+   * @param dos_header
+   * @return
+   */
+  bool edit_dos_header(const U &dos_header);
+
+};
+template<typename T, typename U, typename V>
+class ElfBinary : public BaseBinary<T> {
+ public:
+  int m_fd;
+  ElfBinary(ElfBinary &&) = default;
+  virtual ~ElfBinary();
+  /**
+   * elf executable header
+   */
+  std::tuple<U, int, int> m_elf_header;
+  /**
+   * elf program header
+   */
+  std::vector<std::tuple<V, int, int>> m_program_header;
+
+  virtual void parse_every_thing() override;
+
+  virtual bool edit_section(std::string sec_name, const Section<T> &sec, EditMode mode) override;
+
+  explicit ElfBinary(const BinaryParser &parser);
+
+  bool edit_elf_header(const V &elf_header);
+
+  bool edit_program_header(const U &program_header);
+  Elf *m_elf;
+
+  /**
+   * elf header를 파싱한다.
+   */
+  void parse_elf_header();
+
+  /**
+   * program header를 파싱한다.
+   */
+  void parse_program_header();
+
+  /**
+   * section, section header를 파싱한다.
+   */
+  void parse_section();
+};
+
+class CodeBinary : public Bfd {
+ public:
+  std::vector<uint8_t> m_code;
+  CodeBinary(const BinaryParser &parser);
+  CodeBinary(CodeBinary &&) = default;
+  CodeBinary &operator=(CodeBinary &&) = default;
 };
 
 

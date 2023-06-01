@@ -244,10 +244,10 @@
 		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/include/winnt.h">
 			<Option target="header"/>
 		</Unit>
-		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/inject/CodeInject.cpp">
+		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/inject/inject.cpp">
 			<Option target="inject"/>
 		</Unit>
-		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/inject/CodeInject.h">
+		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/inject/inject.h">
 			<Option target="inject"/>
 		</Unit>
 		<Unit filename="/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_code/binary_test.cpp">

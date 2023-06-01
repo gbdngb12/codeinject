@@ -5,48 +5,52 @@
 
 namespace codeinject::binary {
 FileDescriptor::FileDescriptor(std::string fname) :
-    m_fname{std::move(fname)}, m_fd{open(m_fname.c_str(), O_RDWR)} {
-  if (m_fd == -1) {
-    perror("open");
-    //std::cout << std::format("Failed to open {}", m_fname) << std::endl;
+    m_fname{std::move(fname)}, m_file_stream{m_fname} {
+  if (!m_file_stream) {
+    std::cout << std::format("Failed to open {}", m_fname) << std::endl;
     exit(1);
   }
 }
 
-FileDescriptor::~FileDescriptor() {
-  if (m_fd != -1) {
-    if (close(m_fd) == -1) {
-      perror("close");
-      exit(1);
-    }
-  }
-}
 void FileDescriptor::set_file_name(std::string fname) {
   this->m_fname = std::move(fname);
 
 }
 
-template<typename S>
-void FileDescriptor::write_struct(int pos, int size, S &&struct_data) {
-  const std::byte *data_ptr = reinterpret_cast<const std::byte *>(&struct_data);
+int FileDescriptor::get_file_size() {
+  m_file_stream.seekg(0, std::ios::end);
+  std::streampos fileSize = m_file_stream.tellg(); // Get the current position (which is the end of the file)
+  return fileSize;
+}
 
-  lseek(m_fd, pos, SEEK_SET);
-  auto bytes_written = write(m_fd, data_ptr, size);
-  if (bytes_written == -1) {
-    perror("write");
-    exit(1);
+template<typename S>
+void FileDescriptor::write_data(int pos, int size, S &&struct_data) {
+  if constexpr (std::is_same_v<S, std::vector<uint8_t>>) {
+    m_file_stream.seekp(pos, std::ios_base::beg);
+    m_file_stream.write(reinterpret_cast<char *>(struct_data.data()), size);
+    if (!m_file_stream) {
+      std::cerr << std::format("write error\n");
+      exit(1);
+    }
+  } else {
+    m_file_stream.seekp(pos);
+    const char *byte_data = reinterpret_cast<const char *>(&struct_data);
+    m_file_stream.write(byte_data, size);
+    if (!m_file_stream) {
+      std::cerr << std::format("write error\n");
+      exit(1);
+    }
   }
 }
 
 template<typename S>
-S FileDescriptor::read_struct(int pos, int size) {
-  // S로 바로 읽어보자
+S FileDescriptor::read_data(int pos, int size) {
   std::vector<uint8_t> buf(size);
 
-  lseek(m_fd, pos, SEEK_SET);
-  auto bytes_read = read(m_fd, buf.data(), size);
-  if (bytes_read == -1 && (bytes_read == size)) {
-    perror("read");
+  m_file_stream.seekg(pos, std::ios_base::beg);
+  m_file_stream.read(reinterpret_cast<char *>(buf.data()), size);
+  if (!m_file_stream) {
+    std::cerr << std::format("read error\n");
     exit(1);
   }
   if constexpr (std::is_same_v<S, std::vector<uint8_t>>) {
@@ -86,6 +90,9 @@ void Bfd::open_bfd() {
 }
 Bfd::Bfd(std::string fname, std::shared_ptr<bfd> bfd_h, BinaryType binary_type)
     : FileDescriptor(std::move(fname)), m_bfd_h{std::make_shared<bfd>(*bfd_h)}, m_binary_type{binary_type} {}
+Bfd::Bfd(std::string fname, BinaryType) : FileDescriptor(std::move(fname)) {
+
+}
 
 BinaryParser::BinaryParser(std::string fname) : Bfd(std::move(fname)) {
   // 바이너리 파일의 형식을 정한다.
@@ -143,27 +150,6 @@ Section<T> &BaseBinary<T>::get_section(std::string sec_name) {
   }
 }
 
-template<typename T>
-bool BaseBinary<T>::edit_section(std::string sec_name, const Section<T> &sec, EditMode mode) {
-  auto &sec_header_ref = get_section(std::move(sec_name));
-
-  if (mode == EditMode::EDIT) {
-    // Section Header, Section code 모두 수정
-    //memcpy(std::get<0>(sec_ref.m_section_header).Name, ".abcd\0\0\0", 8);
-    //auto ret = std::get<0>(this->m_sections[0].m_section_header).Name;
-
-    // 1. Section Header 정보를 파일에 쓴다.
-    sec_header_ref = std::move(sec);
-    this->template write_struct<T>(std::get<1>(sec_header_ref.m_section_header),std::get<2>(sec_header_ref.m_section_header),std::move(std::get<0>(sec_header_ref.m_section_header)));
-    // 2.section 정보를 파일에 쓴다. -> 내일 여기서 부터
-    this->template write_struct<std::vector<uint8_t>>(std::get<1>(sec_header_ref.m_section),std::get<2>(sec_header_ref.m_section),std::move(std::get<0>(sec_header_ref.m_section)));
-
-    return true;
-  } else if (mode == EditMode::APPEND) {
-    return true;
-  }
-}
-
 template<typename T, typename U, typename V>
 void PeBinary<T, U, V>::parse_every_thing() {
   // 1. DOS_HEADER를 파싱한다.
@@ -181,14 +167,14 @@ template<typename T, typename U, typename V>
 void PeBinary<T, U, V>::parse_dos_header() {
   int pos = 0;
   int size = sizeof(U);
-  this->m_dos_header = std::make_tuple(std::move(this->template read_struct<U>(pos, size)), pos, size);
+  this->m_dos_header = std::make_tuple(std::move(this->template read_data<U>(pos, size)), pos, size);
 }
 
 template<typename T, typename U, typename V>
 void PeBinary<T, U, V>::parse_pe_header() {
   int pos = std::get<0>(this->m_dos_header).e_lfanew;
   int size = sizeof(V);
-  this->m_pe_header = std::make_tuple(std::move(this->template read_struct<V>(pos, size)), pos, size);
+  this->m_pe_header = std::make_tuple(std::move(this->template read_data<V>(pos, size)), pos, size);
 }
 
 template<typename T, typename U, typename V>
@@ -201,13 +187,13 @@ void PeBinary<T, U, V>::parse_section() {
 
   auto sec_count = this->m_bfd_h->section_count; //Section의 수
   for (int i{0}; i < sec_count; ++i) {
-    auto section_header = this->template read_struct<T>(pos + i * size, size);
+    auto section_header = this->template read_data<T>(pos + i * size, size);
     auto section_name = std::move(std::string(reinterpret_cast<char *>(section_header.Name),
                                               reinterpret_cast<char *>(section_header.Name) + 8));
     auto code_size = section_header.SizeOfRawData;
     auto code_file_offset = section_header.PointerToRawData;
 
-    auto bytes = this->template read_struct<std::vector<uint8_t>>(code_file_offset, code_size);
+    auto bytes = this->template read_data<std::vector<uint8_t>>(code_file_offset, code_size);
 
     Section<T> sec{};
     sec.m_section_name = std::move(section_name);
@@ -217,10 +203,259 @@ void PeBinary<T, U, V>::parse_section() {
   }
 }
 
+template<typename T, typename U, typename V>
+bool PeBinary<T, U, V>::edit_section(std::string sec_name, const Section<T> &sec, EditMode mode) {
+
+  if (mode == EditMode::EDIT) {
+    // 기존의 섹션 정보 수정
+    auto &sec_ref = this->get_section(std::move(sec_name));
+    // 1. Section Header 정보를 파일에 쓴다.
+    sec_ref = std::move(sec);
+    this->template write_data<T>(std::get<1>(sec_ref.m_section_header),
+                                 std::get<2>(sec_ref.m_section_header),
+                                 std::move(std::get<0>(sec_ref.m_section_header)));
+    // 2.section 정보를 파일에 쓴다.
+    this->template write_data<std::vector<uint8_t>>(std::get<1>(sec_ref.m_section),
+                                                    std::get<2>(sec_ref.m_section),
+                                                    std::move(std::get<0>(sec_ref.m_section)));
+    return true;
+  } else if (mode == EditMode::APPEND) {
+    // 섹션 추가
+    // 첫번째 섹션의 시작지점 - 마지막 섹션 헤더의 끝 파일 오프셋 >= 40 (SECTION HEADER SIZE)
+    auto last_sec_header_offset = std::get<1>(this->m_sections.back().m_section_header) + sizeof(T);
+
+    auto first_section_offset = std::get<1>(this->m_sections.front().m_section);
+    //    sizeof(V) + //sizeof(PE Header without IMAGE_DATA_DIRECTORY)
+    //    std::get<0>(this->m_pe_header).OptionalHeader.NumberOfRvaAndSizes * sizeof(IMAGE_DATA_DIRECTORY);
+    auto section_header_size = sizeof(T);
+    if (first_section_offset - last_sec_header_offset >= section_header_size) {
+      this->m_sections.push_back(std::move(sec));
+      this->template write_data<T>(std::get<1>(this->m_sections.back().m_section_header),
+                                   std::get<2>(this->m_sections.back().m_section_header),
+                                   std::move(std::get<0>(this->m_sections.back().m_section_header)));
+      // 2.section 정보를 파일에 쓴다.
+      this->template write_data<std::vector<uint8_t>>(std::get<1>(this->m_sections.back().m_section),
+                                                      std::get<2>(this->m_sections.back().m_section),
+                                                      std::move(std::get<0>(this->m_sections.back().m_section)));
+      return true;
+    } else {
+      std::cerr << std::format("Failed to insert Section to Binary {}\n", this->m_fname);
+      exit(1);
+    }
+    return false;
+  }
+}
+
+template<typename T, typename U, typename V>
+bool PeBinary<T, U, V>::edit_pe_header(const V &pe_header) {
+  std::get<0>(this->m_pe_header) = std::move(pe_header);
+  this->template write_data<V>(std::get<1>(this->m_pe_header),
+                               std::get<2>(this->m_pe_header),
+                               std::move(std::get<0>(this->m_pe_header)));
+  return true;
+}
+
+template<typename T, typename U, typename V>
+bool PeBinary<T, U, V>::edit_dos_header(const U &dos_header) {
+  std::cout << "do nothing now.. in edit dos header" << std::endl;
+  return true;
+}
+
+template<typename T, typename U, typename V>
+ElfBinary<T, U, V>::~ElfBinary() {
+  if (m_elf != 0) {
+    elf_end(m_elf);
+  }
+  close(m_fd);
+}
+template<typename T, typename U, typename V>
+void ElfBinary<T, U, V>::parse_every_thing() {
+  if (elf_version(EV_CURRENT) == EV_NONE) {
+    std::cerr << std::format("Failed to initalize libelf\n");
+    exit(1);
+  }
+
+  m_elf = elf_begin(this->m_fd, ELF_C_READ, NULL);
+  if (!m_elf) {
+    std::cerr << "failed to open ELF file\n";
+    exit(1);
+  }
+
+  if (elf_kind(m_elf) != ELF_K_ELF) {
+    std::cerr << "Not an ELF executable\n";
+    exit(1);
+  }
+
+  // 1. elf header를 파싱한다.
+  parse_elf_header();
+
+  // 2. program header를 파싱한다.
+  parse_program_header();
+
+  // 3. section header, section을 파싱한다.
+  parse_section();
+}
+
+template<typename T, typename U, typename V>
+void ElfBinary<T, U, V>::parse_elf_header() {
+  if (this->m_binary_type == BinaryType::ELF32) {
+    int size = sizeof(U);
+    auto ehdr = elf32_getehdr(m_elf);
+    memcpy(&(std::get<0>(m_elf_header)), ehdr, size);
+    std::get<1>(m_elf_header) = 0;
+    std::get<2>(m_elf_header) = size;
+  } else if (this->m_binary_type == BinaryType::ELF64) {
+    int size = sizeof(U);
+    auto ehdr = elf64_getehdr(m_elf);
+    memcpy(&(std::get<0>(m_elf_header)), ehdr, size);
+    std::get<1>(m_elf_header) = 0;
+    std::get<2>(m_elf_header) = size;
+  } else {
+    exit(1);
+  }
+}
+template<typename T, typename U, typename V>
+void ElfBinary<T, U, V>::parse_program_header() {
+  int size = sizeof(V);
+  auto count = std::get<0>(m_elf_header).e_phnum;
+  for (int i{0}; i < count; ++i) {
+    V program_header{};
+
+    if (this->m_binary_type == BinaryType::ELF32) {
+      auto phdr = elf32_getphdr(m_elf);
+      memcpy(&program_header, &phdr[i], size);
+    } else if (this->m_binary_type == BinaryType::ELF64) {
+      auto phdr = elf64_getphdr(m_elf);
+      memcpy(&program_header, &phdr[i], size);
+    } else {
+      exit(1);
+    }
+    m_program_header.push_back(std::move(std::make_tuple(std::move(program_header),
+                                                         std::get<0>(m_elf_header).e_phoff + size * i,
+                                                         size)));
+  }
+}
+template<typename T, typename U, typename V>
+void ElfBinary<T, U, V>::parse_section() {
+  Elf_Scn *scn = nullptr;
+  size_t shstrndx;
+  int section_header_size = sizeof(T);
+  int i = 0;
+
+  if (elf_getshdrstrndx(m_elf, &shstrndx) < 0) {
+    std::cerr << "Failed to get string table section index\n";
+    exit(1);
+  }
+  // 문자열 테이블등의 다른 요소들은 제외하자 버그있다 -> libbfd 이용
+  asection *bfd_sec = this->m_bfd_h->sections;
+
+  while ((scn = elf_nextscn(m_elf, scn)) && (bfd_sec)) {
+    Section<T> tmp_sec;
+
+    int section_offset = bfd_sec->filepos;
+    int section_size = bfd_sec->size;
+    const char *section_name;
+    if (this->m_binary_type == BinaryType::ELF32) {
+      auto shdr = elf32_getshdr(scn);
+      memcpy(&std::get<0>(tmp_sec.m_section_header), shdr, section_header_size);
+      section_name = elf_strptr(m_elf, shstrndx, shdr->sh_name);
+    } else if (this->m_binary_type == BinaryType::ELF64) {
+      auto shdr = elf64_getshdr(scn);
+      memcpy(&std::get<0>(tmp_sec.m_section_header), shdr, section_header_size);
+      section_offset = shdr->sh_offset;
+      section_size = shdr->sh_size;
+      section_name = elf_strptr(m_elf, shstrndx, shdr->sh_name);
+    } else {
+      exit(1);
+    }
+
+    std::vector<uint8_t> bytes(section_size);
+    if (!bfd_get_section_contents(this->m_bfd_h.get(), bfd_sec, bytes.data(), 0, section_size)) {
+      std::cerr << std::format("failed to read section {} {}\n", section_name, bfd_errmsg(bfd_get_error()));
+    }
+    tmp_sec.m_section = std::make_tuple(std::move(bytes), section_offset, section_size);
+    tmp_sec.m_section_name = std::string(section_name);
+    auto section_header_offset = std::get<0>(this->m_elf_header).e_shoff;// section header의 오프셋
+    std::get<1>(tmp_sec.m_section_header) =
+        section_header_offset + section_header_size/*NULL Section*/+ section_header_size * i++;
+    std::get<2>(tmp_sec.m_section_header) = section_header_size;
+    bfd_sec = bfd_sec->next;
+    this->m_sections.push_back(std::move(tmp_sec));
+  }
+}
+
+template<typename T, typename U, typename V>
+ElfBinary<T, U, V>::ElfBinary(const BinaryParser &parser)
+    : BaseBinary<T>(parser), m_elf{0}, m_fd{open(this->m_fname.c_str(), O_RDWR)} {
+  if (m_fd == -1) {
+    perror("open");
+    exit(1);
+  }
+}
+
+template<typename T, typename U, typename V>
+bool ElfBinary<T, U, V>::edit_elf_header(const V &elf_header) {
+  memcpy(&std::get<0>(this->m_elf_header), &elf_header, sizeof(V));
+  // 이제 실제로 파일에 써야함
+  this->template write_data<U>(std::get<1>(this->m_elf_header),std::get<2>(this->m_elf_header), std::move(std::get<0>(this->m_elf_header)));
+  return true;
+}
+
+template<typename T, typename U, typename V>
+bool ElfBinary<T, U, V>::edit_program_header(const U &program_header) {
+  // 1. find PT_NOTE Segment
+
+  return true;
+}
+
+template<typename T, typename U, typename V>
+bool ElfBinary<T, U, V>::edit_section(std::string sec_name, const Section<T> &sec, EditMode mode) {
+  if (mode == EditMode::EDIT) {
+    // 기존의 섹션 정보 수정
+    auto &sec_ref = this->get_section(std::move(sec_name));
+    // 1. Section Header 정보를 파일에 쓴다.
+    sec_ref = std::move(sec);
+    this->template write_data<T>(std::get<1>(sec_ref.m_section_header),
+                                 std::get<2>(sec_ref.m_section_header),
+                                 std::move(std::get<0>(sec_ref.m_section_header)));
+    // 2.section 정보를 파일에 쓴다.
+    this->template write_data<std::vector<uint8_t>>(std::get<1>(sec_ref.m_section),
+                                                    std::get<2>(sec_ref.m_section),
+                                                    std::move(std::get<0>(sec_ref.m_section)));
+    return true;
+  } else if (mode == EditMode::APPEND) {
+    // 섹션 추가
+    std::cerr << "not supported APPEND Mode\n";
+    return false;
+
+  } else {
+    std::cerr << std::format("Failed to insert Section to Binary {}\n", this->m_fname);
+    exit(1);
+  }
+  return true;
+}
+
+CodeBinary::CodeBinary(const BinaryParser &parser) : Bfd(std::move(parser.m_fname), std::move(parser.m_binary_type)),
+                                                     m_code{this->read_data<std::vector<uint8_t>>(0,
+                                                                                                  this->get_file_size())} {
+}
+
 };
 
 // 템플릿 인스턴스화
 template
 class codeinject::binary::PeBinary<PE_SECTION_HEADER, PE_DOS_HEADER, PE64_HEADERS>;
 template
+class codeinject::binary::PeBinary<PE_SECTION_HEADER, PE_DOS_HEADER, PE32_HEADERS>;
+template
 class codeinject::binary::BaseBinary<PE_SECTION_HEADER>;
+template
+class codeinject::binary::ElfBinary<Elf32_Shdr, Elf32_Ehdr, Elf32_Phdr>;
+template
+class codeinject::binary::ElfBinary<Elf64_Shdr, Elf64_Ehdr, Elf64_Phdr>;
+template
+class codeinject::binary::BaseBinary<Elf32_Shdr>;
+template
+class codeinject::binary::BaseBinary<Elf64_Shdr>;
+
+
