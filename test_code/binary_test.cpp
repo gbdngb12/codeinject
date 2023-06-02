@@ -31,7 +31,7 @@ TEST_CASE("Bfd") {
 
 }
 
-TEST_CASE("BinaryParser") {
+TEST_CASE("ELf64 Binary") {
   BinaryParser binary{excutable_file};
   auto elf_binary = std::make_shared<ElfBinary<Elf64_Shdr, Elf64_Ehdr, Elf64_Phdr>>(binary);
   elf_binary->parse_every_thing();
@@ -41,19 +41,40 @@ TEST_CASE("BinaryParser") {
 
   ElfCodeInject<Elf64_Shdr, Elf64_Ehdr, Elf64_Phdr> elf64_code_inject{elf_binary, std::move(code_binary.m_code)};
   elf64_code_inject.inject_code();
+}
 
+TEST_CASE("ELf32 Binary") {
+  BinaryParser binary{excutable_file};
+  auto elf_binary = std::make_shared<ElfBinary<Elf32_Shdr, Elf32_Ehdr, Elf32_Phdr>>(binary);
+  elf_binary->parse_every_thing();
 
-  //BaseBinary base{binary};
-  //PeBinary<PE_SECTION_HEADER, PE_DOS_HEADER, PE32_HEADERS> pe_binary{binary};
-  //pe_binary.parse_every_thing();
-  //
-  //Section<PE_SECTION_HEADER> sec;
-  //memcpy(std::get<0>(sec.m_section_header).Name, "abcde\0\0\0", 8);
-  //std::get<1>(sec.m_section_header) = 0x1f0; // file offset
-  //std::get<2>(sec.m_section_header) = sizeof(PE_SECTION_HEADER); // file size
-  //sec.m_section = std::make_tuple(std::vector<uint8_t>{'\x43','\x42','\x41'}/*code*/, 0x0400/*file offset*/, 3/*file size*/);
-  //pe_binary.edit_section(".text", sec, EditMode::APPEND);
-  //PE32_HEADERS pe_header{};
-  //pe_binary.edit_pe_header(pe_header);
+  BinaryParser binary2{bin_file};
+  CodeBinary code_binary{binary2};
 
+  ElfCodeInject<Elf32_Shdr, Elf32_Ehdr, Elf32_Phdr> elf32_code_inject{elf_binary, std::move(code_binary.m_code)};
+  elf32_code_inject.inject_code();
+}
+
+TEST_CASE("PE32 Binary") {
+  BinaryParser binary{excutable_file};
+  auto pe_binary = std::make_shared<PeBinary<PE_SECTION_HEADER , PE_DOS_HEADER , PE32_HEADERS>>(binary);
+  pe_binary->parse_every_thing();
+
+  BinaryParser binary2{bin_file};
+  CodeBinary code_binary{binary2};
+
+  PeCodeInject<PE_SECTION_HEADER , PE_DOS_HEADER , PE32_HEADERS> pe32_code_inject{pe_binary, std::move(code_binary.m_code)};
+  pe32_code_inject.inject_code();
+}
+
+TEST_CASE("PE64 Binary") {
+  BinaryParser binary{excutable_file};
+  auto pe_binary = std::make_shared<PeBinary<PE_SECTION_HEADER , PE_DOS_HEADER , PE64_HEADERS>>(binary);
+  pe_binary->parse_every_thing();
+
+  BinaryParser binary2{bin_file};
+  CodeBinary code_binary{binary2};
+
+  PeCodeInject<PE_SECTION_HEADER , PE_DOS_HEADER , PE64_HEADERS> pe64_code_inject{pe_binary, std::move(code_binary.m_code)};
+  pe64_code_inject.inject_code();
 }

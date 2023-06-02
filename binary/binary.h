@@ -21,7 +21,6 @@ using fmt::formatter;
 #include "winnt.h"
 #include "elf.h"
 
-
 namespace codeinject::binary {
 enum class BinaryType {
   PE32 = 0,
@@ -67,7 +66,7 @@ class FileDescriptor {
    * @param struct_data 구조체
    */
   template<typename S>
-  void write_data(int pos, int size, S &&struct_data);
+  void write_data(int pos, int size, const S& struct_data);
 
   /**
    * 파일을 연다.
@@ -78,7 +77,6 @@ class FileDescriptor {
    * 파일을 열지 않는다.
    */
   explicit FileDescriptor() = default;
-
 
   /**
    * 파일의 이름을 설정한다.
@@ -202,7 +200,8 @@ class BaseBinary : public Bfd {
    * @param mode 수정, 삽입
    * @return 수정한 Section<T>
    */
-  virtual bool edit_section(std::string sec_name, const Section<T> &sec, EditMode mode) = 0;
+  virtual bool edit_section_header(const Section<T> &sec, EditMode mode) = 0;
+  virtual bool edit_section(const Section<T> &sec, EditMode mode) = 0;
 
 };
 
@@ -241,7 +240,8 @@ class PeBinary : public BaseBinary<T> {
    */
   void parse_section();
 
-  virtual bool edit_section(std::string sec_name, const Section<T> &sec, EditMode mode) override;
+  virtual bool edit_section_header(const Section<T> &sec, EditMode mode) override;
+  virtual bool edit_section(const Section<T> &sec, EditMode mode) override;
 
   /**
    * PE HEADER를 수정한다.
@@ -275,13 +275,14 @@ class ElfBinary : public BaseBinary<T> {
 
   virtual void parse_every_thing() override;
 
-  virtual bool edit_section(std::string sec_name, const Section<T> &sec, EditMode mode) override;
+  virtual bool edit_section_header(const Section<T> &sec, EditMode mode) override;
+  virtual bool edit_section(const Section<T> &sec, EditMode mode) override;
 
   explicit ElfBinary(const BinaryParser &parser);
 
-  bool edit_elf_header(const V &elf_header);
+  bool edit_elf_header(const U &elf_header);
 
-  bool edit_program_header(const U &program_header);
+  bool edit_program_header(const V &program_header, int index);
   Elf *m_elf;
 
   /**
@@ -307,6 +308,5 @@ class CodeBinary : public Bfd {
   CodeBinary(CodeBinary &&) = default;
   CodeBinary &operator=(CodeBinary &&) = default;
 };
-
 
 };

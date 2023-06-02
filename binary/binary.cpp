@@ -24,10 +24,10 @@ int FileDescriptor::get_file_size() {
 }
 
 template<typename S>
-void FileDescriptor::write_data(int pos, int size, S &&struct_data) {
+void FileDescriptor::write_data(int pos, int size, const S &struct_data) {
   if constexpr (std::is_same_v<S, std::vector<uint8_t>>) {
     m_file_stream.seekp(pos, std::ios_base::beg);
-    m_file_stream.write(reinterpret_cast<char *>(struct_data.data()), size);
+    m_file_stream.write(reinterpret_cast<const char *>(struct_data.data()), size);
     if (!m_file_stream) {
       std::cerr << std::format("write error\n");
       exit(1);
@@ -202,25 +202,17 @@ void PeBinary<T, U, V>::parse_section() {
     this->m_sections.push_back(std::move(sec));
   }
 }
-
 template<typename T, typename U, typename V>
-bool PeBinary<T, U, V>::edit_section(std::string sec_name, const Section<T> &sec, EditMode mode) {
-
+bool PeBinary<T, U, V>::edit_section_header(const Section<T> &sec, EditMode mode) {
   if (mode == EditMode::EDIT) {
-    // 기존의 섹션 정보 수정
-    auto &sec_ref = this->get_section(std::move(sec_name));
-    // 1. Section Header 정보를 파일에 쓴다.
-    sec_ref = std::move(sec);
-    this->template write_data<T>(std::get<1>(sec_ref.m_section_header),
-                                 std::get<2>(sec_ref.m_section_header),
-                                 std::move(std::get<0>(sec_ref.m_section_header)));
-    // 2.section 정보를 파일에 쓴다.
-    this->template write_data<std::vector<uint8_t>>(std::get<1>(sec_ref.m_section),
-                                                    std::get<2>(sec_ref.m_section),
-                                                    std::move(std::get<0>(sec_ref.m_section)));
+    // pe의 섹션 헤더 정보를 수정한다.
+    this->template write_data<T>(std::get<1>(sec.m_section_header),
+                                 std::get<2>(sec.m_section_header),
+                                 std::get<0>(sec.m_section_header));
     return true;
   } else if (mode == EditMode::APPEND) {
-    // 섹션 추가
+    /*
+     * // 섹션 추가
     // 첫번째 섹션의 시작지점 - 마지막 섹션 헤더의 끝 파일 오프셋 >= 40 (SECTION HEADER SIZE)
     auto last_sec_header_offset = std::get<1>(this->m_sections.back().m_section_header) + sizeof(T);
 
@@ -232,18 +224,35 @@ bool PeBinary<T, U, V>::edit_section(std::string sec_name, const Section<T> &sec
       this->m_sections.push_back(std::move(sec));
       this->template write_data<T>(std::get<1>(this->m_sections.back().m_section_header),
                                    std::get<2>(this->m_sections.back().m_section_header),
-                                   std::move(std::get<0>(this->m_sections.back().m_section_header)));
+                                   std::get<0>(this->m_sections.back().m_section_header));
       // 2.section 정보를 파일에 쓴다.
       this->template write_data<std::vector<uint8_t>>(std::get<1>(this->m_sections.back().m_section),
                                                       std::get<2>(this->m_sections.back().m_section),
-                                                      std::move(std::get<0>(this->m_sections.back().m_section)));
+                                                      std::get<0>(this->m_sections.back().m_section));
       return true;
-    } else {
-      std::cerr << std::format("Failed to insert Section to Binary {}\n", this->m_fname);
-      exit(1);
-    }
-    return false;
+     * */
+  } else {
+    std::cerr << std::format("Failed to insert Section to Binary {}\n", this->m_fname);
+    exit(1);
   }
+  return false;
+}
+template<typename T, typename U, typename V>
+bool PeBinary<T, U, V>::edit_section(const Section<T> &sec, EditMode mode) {
+
+  if (mode == EditMode::EDIT) {
+    // 기존의 섹션 정보 수정
+    this->template write_data<std::vector<uint8_t>>(std::get<1>(sec.m_section),
+                                                    std::get<2>(sec.m_section),
+                                                    std::get<0>(sec.m_section));
+    return true;
+  } else if (mode == EditMode::APPEND) {
+    return true;
+  } else {
+    std::cerr << std::format("Failed to insert Section to Binary {}\n", this->m_fname);
+    exit(1);
+  }
+  return false;
 }
 
 template<typename T, typename U, typename V>
@@ -251,7 +260,7 @@ bool PeBinary<T, U, V>::edit_pe_header(const V &pe_header) {
   std::get<0>(this->m_pe_header) = std::move(pe_header);
   this->template write_data<V>(std::get<1>(this->m_pe_header),
                                std::get<2>(this->m_pe_header),
-                               std::move(std::get<0>(this->m_pe_header)));
+                               std::get<0>(this->m_pe_header));
   return true;
 }
 
@@ -320,7 +329,6 @@ void ElfBinary<T, U, V>::parse_program_header() {
   auto count = std::get<0>(m_elf_header).e_phnum;
   for (int i{0}; i < count; ++i) {
     V program_header{};
-
     if (this->m_binary_type == BinaryType::ELF32) {
       auto phdr = elf32_getphdr(m_elf);
       memcpy(&program_header, &phdr[i], size);
@@ -346,7 +354,7 @@ void ElfBinary<T, U, V>::parse_section() {
     std::cerr << "Failed to get string table section index\n";
     exit(1);
   }
-  // 문자열 테이블등의 다른 요소들은 제외하자 버그있다 -> libbfd 이용
+  // 아니.. 이거 그냥 파일자체가 망가진거였음
   asection *bfd_sec = this->m_bfd_h->sections;
 
   while ((scn = elf_nextscn(m_elf, scn)) && (bfd_sec)) {
@@ -362,8 +370,6 @@ void ElfBinary<T, U, V>::parse_section() {
     } else if (this->m_binary_type == BinaryType::ELF64) {
       auto shdr = elf64_getshdr(scn);
       memcpy(&std::get<0>(tmp_sec.m_section_header), shdr, section_header_size);
-      section_offset = shdr->sh_offset;
-      section_size = shdr->sh_size;
       section_name = elf_strptr(m_elf, shstrndx, shdr->sh_name);
     } else {
       exit(1);
@@ -394,34 +400,31 @@ ElfBinary<T, U, V>::ElfBinary(const BinaryParser &parser)
 }
 
 template<typename T, typename U, typename V>
-bool ElfBinary<T, U, V>::edit_elf_header(const V &elf_header) {
-  memcpy(&std::get<0>(this->m_elf_header), &elf_header, sizeof(V));
+bool ElfBinary<T, U, V>::edit_elf_header(const U &elf_header) {
+  memcpy(&std::get<0>(this->m_elf_header), &elf_header, sizeof(U));
   // 이제 실제로 파일에 써야함
-  this->template write_data<U>(std::get<1>(this->m_elf_header),std::get<2>(this->m_elf_header), std::move(std::get<0>(this->m_elf_header)));
+  this->template write_data<U>(std::get<1>(this->m_elf_header),
+                               std::get<2>(this->m_elf_header),
+                               std::get<0>(this->m_elf_header));
   return true;
 }
 
 template<typename T, typename U, typename V>
-bool ElfBinary<T, U, V>::edit_program_header(const U &program_header) {
-  // 1. find PT_NOTE Segment
-
+bool ElfBinary<T, U, V>::edit_program_header(const V &program_header, int index) {
+  auto &program_header_ref = this->m_program_header[index];
+  this->template write_data<V>(std::get<1>(program_header_ref),
+                               std::get<2>(program_header_ref),
+                               std::get<0>(program_header_ref));
   return true;
 }
 
 template<typename T, typename U, typename V>
-bool ElfBinary<T, U, V>::edit_section(std::string sec_name, const Section<T> &sec, EditMode mode) {
+bool ElfBinary<T, U, V>::edit_section_header(const Section<T> &sec, EditMode mode) {
   if (mode == EditMode::EDIT) {
-    // 기존의 섹션 정보 수정
-    auto &sec_ref = this->get_section(std::move(sec_name));
     // 1. Section Header 정보를 파일에 쓴다.
-    sec_ref = std::move(sec);
-    this->template write_data<T>(std::get<1>(sec_ref.m_section_header),
-                                 std::get<2>(sec_ref.m_section_header),
-                                 std::move(std::get<0>(sec_ref.m_section_header)));
-    // 2.section 정보를 파일에 쓴다.
-    this->template write_data<std::vector<uint8_t>>(std::get<1>(sec_ref.m_section),
-                                                    std::get<2>(sec_ref.m_section),
-                                                    std::move(std::get<0>(sec_ref.m_section)));
+    this->template write_data<T>(std::get<1>(sec.m_section_header),
+                                 std::get<2>(sec.m_section_header),
+                                 std::get<0>(sec.m_section_header));
     return true;
   } else if (mode == EditMode::APPEND) {
     // 섹션 추가
@@ -432,6 +435,15 @@ bool ElfBinary<T, U, V>::edit_section(std::string sec_name, const Section<T> &se
     std::cerr << std::format("Failed to insert Section to Binary {}\n", this->m_fname);
     exit(1);
   }
+  return true;
+}
+template<typename T, typename U, typename V>
+bool ElfBinary<T, U, V>::edit_section(const Section<T> &sec, EditMode mode) {
+  /// 실제 섹션을 수정하고 파일에 기록한다.
+  //section 정보를 파일에 쓴다.
+  this->template write_data<std::vector<uint8_t>>(std::get<1>(sec.m_section),
+                                                  std::get<2>(sec.m_section),
+                                                  std::get<0>(sec.m_section));
   return true;
 }
 
