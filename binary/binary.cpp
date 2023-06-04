@@ -211,8 +211,7 @@ bool PeBinary<T, U, V>::edit_section_header(const Section<T> &sec, EditMode mode
                                  std::get<0>(sec.m_section_header));
     return true;
   } else if (mode == EditMode::APPEND) {
-    /*
-     * // 섹션 추가
+    // 섹션 추가
     // 첫번째 섹션의 시작지점 - 마지막 섹션 헤더의 끝 파일 오프셋 >= 40 (SECTION HEADER SIZE)
     auto last_sec_header_offset = std::get<1>(this->m_sections.back().m_section_header) + sizeof(T);
 
@@ -230,13 +229,14 @@ bool PeBinary<T, U, V>::edit_section_header(const Section<T> &sec, EditMode mode
                                                       std::get<2>(this->m_sections.back().m_section),
                                                       std::get<0>(this->m_sections.back().m_section));
       return true;
-     * */
-  } else {
-    std::cerr << std::format("Failed to insert Section to Binary {}\n", this->m_fname);
-    exit(1);
+    } else {
+      std::cerr << std::format("Failed to insert Section to Binary {}\n", this->m_fname);
+      exit(1);
+    }
+    return false;
   }
-  return false;
 }
+
 template<typename T, typename U, typename V>
 bool PeBinary<T, U, V>::edit_section(const Section<T> &sec, EditMode mode) {
 
@@ -256,8 +256,7 @@ bool PeBinary<T, U, V>::edit_section(const Section<T> &sec, EditMode mode) {
 }
 
 template<typename T, typename U, typename V>
-bool PeBinary<T, U, V>::edit_pe_header(const V &pe_header) {
-  std::get<0>(this->m_pe_header) = std::move(pe_header);
+bool PeBinary<T, U, V>::edit_pe_header() {
   this->template write_data<V>(std::get<1>(this->m_pe_header),
                                std::get<2>(this->m_pe_header),
                                std::get<0>(this->m_pe_header));
@@ -387,6 +386,38 @@ void ElfBinary<T, U, V>::parse_section() {
     std::get<2>(tmp_sec.m_section_header) = section_header_size;
     bfd_sec = bfd_sec->next;
     this->m_sections.push_back(std::move(tmp_sec));
+  }
+  //. shstrtab 정보 읽기
+  while (scn) {
+    int section_header_offset =
+        std::get<1>(this->m_sections.back().m_section_header) + std::get<2>(this->m_sections.back().m_section_header);
+    int section_header_size = sizeof(T);
+    int section_offset = 0;
+    int section_size = 0;
+    const char *section_name;
+    Section<T> tmp_sec;
+    if (this->m_binary_type == BinaryType::ELF32) {
+      auto shdr = elf32_getshdr(scn);
+      memcpy(&std::get<0>(tmp_sec.m_section_header), shdr, section_header_size);
+      section_name = elf_strptr(m_elf, shstrndx, shdr->sh_name);
+      section_offset = shdr->sh_offset;
+      section_size = shdr->sh_size;
+    } else if (this->m_binary_type == BinaryType::ELF64) {
+      auto shdr = elf64_getshdr(scn);
+      memcpy(&std::get<0>(tmp_sec.m_section_header), shdr, section_header_size);
+      section_name = elf_strptr(m_elf, shstrndx, shdr->sh_name);
+      section_offset = shdr->sh_offset;
+      section_size = shdr->sh_size;
+    } else {
+      exit(1);
+    }
+    auto bytes = this->template read_data<std::vector<uint8_t>>(section_offset, section_size);
+    std::get<1>(tmp_sec.m_section_header) = section_header_offset;
+    std::get<2>(tmp_sec.m_section_header) = section_header_size;
+    tmp_sec.m_section_name = std::move(std::string(section_name));
+    tmp_sec.m_section = std::make_tuple(bytes, section_offset, section_size);
+    this->m_sections.push_back(std::move(tmp_sec));
+    scn = elf_nextscn(m_elf, scn);
   }
 }
 

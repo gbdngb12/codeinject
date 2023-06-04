@@ -2,8 +2,8 @@
 #include "inject.h"
 #include <catch2/catch_all.hpp>
 #include <iostream>
-#define excutable_file "/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/elf_64"
-#define bin_file "/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/linux_backdoor.bin"
+#define excutable_file "/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/pe_32"
+#define bin_file "/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/win_backdoor_32.bin"
 #define edit_file "/home/dong/Downloads/elf_backdoor/backdoor/codeinject/test_files/file_stream_test"
 using namespace std;
 using namespace codeinject::binary;

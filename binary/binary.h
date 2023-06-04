@@ -248,7 +248,7 @@ class PeBinary : public BaseBinary<T> {
    * @param pe_header
    * @return
    */
-  bool edit_pe_header(const V &pe_header);
+  bool edit_pe_header();
 
   /**
    * DOS HEADER를 수정한다.
