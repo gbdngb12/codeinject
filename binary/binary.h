@@ -66,7 +66,7 @@ class FileDescriptor {
    * @param struct_data 구조체
    */
   template<typename S>
-  void write_data(int pos, int size, const S& struct_data);
+  void write_data(int pos, int size, const S &struct_data);
 
   /**
    * 파일을 연다.
@@ -310,3 +310,13 @@ class CodeBinary : public Bfd {
 };
 
 };
+using pe_32 = codeinject::binary::PeBinary<PE_SECTION_HEADER, PE_DOS_HEADER, PE32_HEADERS>;
+using pe_32_ptr = std::shared_ptr<codeinject::binary::PeBinary<PE_SECTION_HEADER, PE_DOS_HEADER, PE32_HEADERS>>;
+using pe_64 = codeinject::binary::PeBinary<PE_SECTION_HEADER, PE_DOS_HEADER, PE64_HEADERS>;
+using pe_64_ptr = std::shared_ptr<codeinject::binary::PeBinary<PE_SECTION_HEADER, PE_DOS_HEADER, PE64_HEADERS>>;
+using elf_32 = codeinject::binary::ElfBinary<Elf32_Shdr, Elf32_Ehdr, Elf32_Phdr>;
+using elf_32_ptr = std::shared_ptr<codeinject::binary::ElfBinary<Elf32_Shdr, Elf32_Ehdr, Elf32_Phdr>>;
+using elf_64 = codeinject::binary::ElfBinary<Elf64_Shdr, Elf64_Ehdr, Elf64_Phdr>;
+using elf_64_ptr = std::shared_ptr<codeinject::binary::ElfBinary<Elf64_Shdr, Elf64_Ehdr, Elf64_Phdr>>;
+using code = codeinject::binary::CodeBinary;
+using code_ptr = std::shared_ptr<codeinject::binary::CodeBinary>;

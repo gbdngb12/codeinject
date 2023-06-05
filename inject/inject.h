@@ -92,7 +92,9 @@ class ElfCodeInject : public CodeInject {
 
   std::shared_ptr<codeinject::binary::ElfBinary<T, U, V>> m_elf_binary_ptr;
   virtual bool inject_code() override;
-  ElfCodeInject(std::shared_ptr<codeinject::binary::ElfBinary<T, U, V>>, std::vector<uint8_t> code);
+  ElfCodeInject(std::shared_ptr<codeinject::binary::ElfBinary<T, U, V>>,
+                std::vector<uint8_t> code,
+                size_t address);
 
   /**
    * PT_NOTE Segment를 찾고 인덱스를 설정한다.
@@ -142,3 +144,8 @@ class ElfCodeInject : public CodeInject {
 
 };
 };
+
+using pe_64_codeinject = codeinject::inject::PeCodeInject<PE_SECTION_HEADER, PE_DOS_HEADER, PE64_HEADERS>;
+using pe_32_codeinject = codeinject::inject::PeCodeInject<PE_SECTION_HEADER, PE_DOS_HEADER, PE32_HEADERS>;
+using elf_32_codeinject = codeinject::inject::ElfCodeInject<Elf32_Shdr, Elf32_Ehdr, Elf32_Phdr>;
+using elf_64_codeinject = codeinject::inject::ElfCodeInject<Elf64_Shdr, Elf64_Ehdr, Elf64_Phdr>;

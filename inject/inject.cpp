@@ -67,18 +67,19 @@ void PeCodeInject<T, U, V>::rewrite_pe_optional_header() {
   // SizeOfImage = 기존 값 + 삽입한 코드의 VirtualAddress + VirtualSize를 SectionAlignment로 정렬한 값
   // DLLCharacteristics = 메모리 보호 기법 제거
   auto &pe_optional_header = std::get<0>(this->m_pe_binary_ptr->m_pe_header).OptionalHeader;
+  auto &pe_file_header = std::get<0>(this->m_pe_binary_ptr->m_pe_header).FileHeader;
+  pe_file_header.NumberOfSections++;
   pe_optional_header.AddressOfEntryPoint = this->m_inject_vaddr; //EP
   pe_optional_header.SizeOfImage = calc_alignment(m_inject_vaddr + m_inject_size); //전체 크기
   pe_optional_header.DllCharacteristics &= ~(static_cast<int>(DLLCharacteristics::IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE)
       | static_cast<int>(DLLCharacteristics::IMAGE_DLLCHARACTERISTICS_GUARD_CF)
       | static_cast<int>(DLLCharacteristics::IMAGE_DLLCHARACTERISTICS_NX_COMPAT));// 메모리 보호 기법 제거
+  this->m_pe_binary_ptr->edit_pe_header();
 }
 template<typename T, typename U, typename V>
 void PeCodeInject<T, U, V>::rewrite_pe_file_header() {
   // NumberOfSection 한개 증가
-  auto &pe_file_header = std::get<0>(this->m_pe_binary_ptr->m_pe_header).FileHeader;
-  pe_file_header.NumberOfSections++;
-  this->m_pe_binary_ptr->edit_pe_header();// 실제 값 수정
+  //this->m_pe_binary_ptr->edit_pe_header();// 실제 값 수정
 }
 template<typename T, typename U, typename V>
 PeCodeInject<T, U, V>::PeCodeInject(std::shared_ptr<binary::PeBinary<T, U, V>> pe_binary, std::vector<uint8_t> code)
@@ -108,16 +109,19 @@ bool ElfCodeInject<T, U, V>::inject_code() {
   return true;
 }
 template<typename T, typename U, typename V>
-ElfCodeInject<T, U, V>::ElfCodeInject(std::shared_ptr<binary::ElfBinary<T, U, V>> elf_binary, std::vector<uint8_t> code)
+ElfCodeInject<T, U, V>::ElfCodeInject(std::shared_ptr<binary::ElfBinary<T, U, V>> elf_binary,
+                                      std::vector<uint8_t> code,
+                                      size_t address)
     : m_elf_binary_ptr{elf_binary},
       CodeInject(std::move(code), ".injected", ".note.ABI-tag"),
       m_program_header_index{0} {
   this->m_inject_size = this->m_code.size();
   this->m_inject_offset = this->m_elf_binary_ptr->get_file_size();
-  /**
-   * @TODO 하드 코딩된값!! 반드시 수정해야함!
-   */
-  m_inject_vaddr = 0x500000;
+  if (!address) {
+    this->m_inject_vaddr = 0x800000;
+  } else {
+    this->m_inject_vaddr = address;
+  }
 }
 
 template<typename T, typename U, typename V>

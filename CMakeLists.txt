@@ -9,18 +9,16 @@ add_subdirectory("inject")
 
 
 # Set Test Mode Option
-option(TEST_CASE "Build with test case" ON)
+option(TEST_CASE "Build with test case" OFF)
 
 if(TEST_CASE)
     add_subdirectory("test_code")
 endif()
 
-if(!TEST_CASE)
-    add_executable(${PROJECT_NAME} "main.cpp")
+add_executable(${PROJECT_NAME} "codeinject.cpp" codeinject.cpp)
 
-    target_link_libraries(${PROJECT_NAME}
-        PRIVATE
-            binary
-            inject
-    )
-endif()
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+        binary
+        inject
+)
