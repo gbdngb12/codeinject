@@ -19,11 +19,9 @@ bool PeCodeInject<T, U, V>::inject_code() {
   // 1. 섹션 헤더, 섹션 정보, 코드를 추가한다.
   write_sections();
 
-  // 2. PE Optional Header 정보를 수정한다.
-  rewrite_pe_optional_header();
+  // 2. PE Header 정보를 수정한다.
+  rewrite_pe_header();
 
-  // 3. PE File Header 정보를 수정한다.
-  rewrite_pe_file_header();
 
   return true;
 }
@@ -62,16 +60,18 @@ int PeCodeInject<T, U, V>::calc_alignment(int value) {
   return value + m_section_alignment - value % m_section_alignment;
 }
 template<typename T, typename U, typename V>
-void PeCodeInject<T, U, V>::rewrite_pe_optional_header() {
+void PeCodeInject<T, U, V>::rewrite_pe_header() {
   // AddressOfEntryPoint = 삽입한 코드의 가상 메모리
   // SizeOfImage = 기존 값 + 삽입한 코드의 VirtualAddress + VirtualSize를 SectionAlignment로 정렬한 값
   // DLLCharacteristics = 메모리 보호 기법 제거
+  // rewrite pe optional header
   auto &pe_optional_header = std::get<0>(this->m_pe_binary_ptr->m_pe_header).OptionalHeader;
   pe_optional_header.AddressOfEntryPoint = this->m_inject_vaddr; //EP
   pe_optional_header.SizeOfImage = calc_alignment(m_inject_vaddr + m_inject_size); //전체 크기
   pe_optional_header.DllCharacteristics &= ~(static_cast<int>(DLLCharacteristics::IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE)
       | static_cast<int>(DLLCharacteristics::IMAGE_DLLCHARACTERISTICS_GUARD_CF)
       | static_cast<int>(DLLCharacteristics::IMAGE_DLLCHARACTERISTICS_NX_COMPAT));// 메모리 보호 기법 제거
+  rewrite_pe_file_header();
   this->m_pe_binary_ptr->edit_pe_header();
 }
 template<typename T, typename U, typename V>

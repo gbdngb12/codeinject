@@ -68,7 +68,7 @@ class PeCodeInject : public CodeInject {
    * PE Optional Header 정보를 수정한다.
    * EP, SizeOfImage, DLLCharacteristic
    */
-  void rewrite_pe_optional_header();
+  void rewrite_pe_header();
 
   /**
    * PE File Header 정보를 수정한다.
