@@ -1,12 +1,14 @@
 # codeinject
 This project is a tool for injecting code into ELF and PE files.
 
-## Build dependencies
+## Installation
+
+### Build dependencies
 - libelf-dev
 - binutils-dev
 - C++20
 
-## Build
+### Build
 
 ```bash
 $ ./configure.sh
@@ -20,4 +22,4 @@ $ cd build/
 $ ./codeinject <target> <inject> <address>
 ```
 
-### Documentation
+## Documentation
