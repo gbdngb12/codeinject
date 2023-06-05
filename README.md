@@ -7,6 +7,7 @@ This project is a tool for injecting code into ELF and PE files.
 - libelf-dev
 - binutils-dev
 - C++20(libfmt-dev)
+- cmake
 
 ### Build
 
