@@ -23,4 +23,4 @@ $ ./codeinject <target> <inject> <address>
 ```
 
 ## Documentation
-[wiki](https://github.com/gbdngb12/codeinject.wiki.git)
+[wiki](https://github.com/gbdngb12/codeinject/wiki)
