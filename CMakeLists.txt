@@ -15,10 +15,12 @@ if(TEST_CASE)
     add_subdirectory("test_code")
 endif()
 
-add_executable(${PROJECT_NAME} "codeinject.cpp" codeinject.cpp)
+if(!TEST_CASE)
+    add_executable(${PROJECT_NAME} "codeinject.cpp" codeinject.cpp)
 
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE
-        binary
-        inject
-)
+    target_link_libraries(${PROJECT_NAME}
+        PRIVATE
+            binary
+            inject
+    )
+endif()
