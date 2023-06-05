@@ -1,0 +1,126 @@
+\hypertarget{classcodeinject_1_1inject_1_1PeCodeInject}{}\doxysection{codeinject\+::inject\+::Pe\+Code\+Inject\texorpdfstring{$<$}{<} T, U, V \texorpdfstring{$>$}{>} Class Template Reference}
+\label{classcodeinject_1_1inject_1_1PeCodeInject}\index{codeinject::inject::PeCodeInject$<$ T, U, V $>$@{codeinject::inject::PeCodeInject$<$ T, U, V $>$}}
+Inheritance diagram for codeinject\+::inject\+::Pe\+Code\+Inject\texorpdfstring{$<$}{<} T, U, V \texorpdfstring{$>$}{>}\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{classcodeinject_1_1inject_1_1PeCodeInject}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1inject_1_1PeCodeInject_a51f7f0a185e0e85048dff7a82de2df84}\label{classcodeinject_1_1inject_1_1PeCodeInject_a51f7f0a185e0e85048dff7a82de2df84}} 
+enum class {\bfseries Section\+Flag} \{ {\bfseries IMAGE\+\_\+\+SCN\+\_\+\+CNT\+\_\+\+INITIALIZED\+\_\+\+DATA} = 0x00000040
+, {\bfseries IMAGE\+\_\+\+SCN\+\_\+\+MEM\+\_\+\+READ} = 0x40000000
+, {\bfseries IMAGE\+\_\+\+SCN\+\_\+\+MEM\+\_\+\+EXECUTE} = 0x20000000
+ \}
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1inject_1_1PeCodeInject_a1407da10aa125ee036e30ae18fc0d82d}\label{classcodeinject_1_1inject_1_1PeCodeInject_a1407da10aa125ee036e30ae18fc0d82d}} 
+enum class {\bfseries DLLCharacteristics} \{ {\bfseries IMAGE\+\_\+\+DLLCHARACTERISTICS\+\_\+\+DYNAMIC\+\_\+\+BASE} = 0x0040
+, {\bfseries IMAGE\+\_\+\+DLLCHARACTERISTICS\+\_\+\+GUARD\+\_\+\+CF} = 0x4000
+, {\bfseries IMAGE\+\_\+\+DLLCHARACTERISTICS\+\_\+\+NX\+\_\+\+COMPAT} = 0x0100
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual bool \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject_a50e2c09e9112fc336c6dd0a75ad5a753}{inject\+\_\+code}} () override
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1inject_1_1PeCodeInject_acfd7098f998d315466d8366b2dfeea25}\label{classcodeinject_1_1inject_1_1PeCodeInject_acfd7098f998d315466d8366b2dfeea25}} 
+{\bfseries Pe\+Code\+Inject} (std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary}{codeinject\+::binary\+::\+Pe\+Binary}}$<$ T, U, V $>$ $>$, std\+::vector$<$ uint8\+\_\+t $>$ \mbox{\hyperlink{classcodeinject_1_1binary_1_1CodeBinary}{code}})
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1inject_1_1PeCodeInject_a5215dad139182818d9a312ebb8353876}\label{classcodeinject_1_1inject_1_1PeCodeInject_a5215dad139182818d9a312ebb8353876}} 
+int {\bfseries calc\+\_\+alignment} (int)
+\item 
+void \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject_a27e597fc5e0d6d5ca382470077d91a54}{write\+\_\+sections}} ()
+\item 
+void \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject_a711fa16dd8c5c51351c1b03ab7bc4b52}{rewrite\+\_\+pe\+\_\+optional\+\_\+header}} ()
+\item 
+void \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject_a708d7d8dffc3ec026b28070a4c50d05b}{rewrite\+\_\+pe\+\_\+file\+\_\+header}} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions inherited from \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject}{codeinject\+::inject\+::\+Code\+Inject}}}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1inject_1_1CodeInject_ad5433aa4124f313677788b7d5ab3c758}\label{classcodeinject_1_1inject_1_1CodeInject_ad5433aa4124f313677788b7d5ab3c758}} 
+virtual bool {\bfseries inject\+\_\+code} ()=0
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1inject_1_1CodeInject_a421a1b7f5be755239bdd91f3fb720772}\label{classcodeinject_1_1inject_1_1CodeInject_a421a1b7f5be755239bdd91f3fb720772}} 
+{\bfseries Code\+Inject} (std\+::vector$<$ uint8\+\_\+t $>$, std\+::string inject\+\_\+name, std\+::string target\+\_\+name)
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject_a759cb02bc134830e09c301cb1b8719a6}{m\+\_\+section\+\_\+alignment}}
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1inject_1_1PeCodeInject_a2f2b2f663ceffb52c2531bc355bcc381}\label{classcodeinject_1_1inject_1_1PeCodeInject_a2f2b2f663ceffb52c2531bc355bcc381}} 
+std\+::shared\+\_\+ptr$<$ \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary}{codeinject\+::binary\+::\+Pe\+Binary}}$<$ T, U, V $>$ $>$ {\bfseries m\+\_\+pe\+\_\+binary\+\_\+ptr}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes inherited from \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject}{codeinject\+::inject\+::\+Code\+Inject}}}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1inject_1_1CodeInject_a6ac6560cd53855d0278860d0ff8020ef}\label{classcodeinject_1_1inject_1_1CodeInject_a6ac6560cd53855d0278860d0ff8020ef}} 
+std\+::vector$<$ uint8\+\_\+t $>$ {\bfseries m\+\_\+code}
+\item 
+std\+::string \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject_a305d115f40fbaaafcb6dcc0b80c8dc0f}{m\+\_\+inject\+\_\+section\+\_\+name}}
+\item 
+std\+::string \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject_a06aeb52981ae8e6174c176976664d320}{m\+\_\+target\+\_\+section\+\_\+name}}
+\item 
+int \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject_a058f6daca07a7402567f5fc57f72f0a4}{m\+\_\+inject\+\_\+offset}}
+\item 
+size\+\_\+t \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject_a8a19d582b199d7c87672e8e89907dac5}{m\+\_\+inject\+\_\+vaddr}}
+\item 
+int \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject_a02314ba53abe30ca30dee9c9b0d56167}{m\+\_\+inject\+\_\+size}}
+\item 
+int \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject_a6712450bbd1d16953f61353daec545ba}{m\+\_\+inject\+\_\+index}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classcodeinject_1_1inject_1_1PeCodeInject_a50e2c09e9112fc336c6dd0a75ad5a753}\label{classcodeinject_1_1inject_1_1PeCodeInject_a50e2c09e9112fc336c6dd0a75ad5a753}} 
+\index{codeinject::inject::PeCodeInject$<$ T, U, V $>$@{codeinject::inject::PeCodeInject$<$ T, U, V $>$}!inject\_code@{inject\_code}}
+\index{inject\_code@{inject\_code}!codeinject::inject::PeCodeInject$<$ T, U, V $>$@{codeinject::inject::PeCodeInject$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{inject\_code()}{inject\_code()}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+bool \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject}{codeinject\+::inject\+::\+Pe\+Code\+Inject}}$<$ T, U, V $>$\+::inject\+\_\+code\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject}{codeinject\+::inject\+::\+Code\+Inject}}.
+
+\mbox{\Hypertarget{classcodeinject_1_1inject_1_1PeCodeInject_a708d7d8dffc3ec026b28070a4c50d05b}\label{classcodeinject_1_1inject_1_1PeCodeInject_a708d7d8dffc3ec026b28070a4c50d05b}} 
+\index{codeinject::inject::PeCodeInject$<$ T, U, V $>$@{codeinject::inject::PeCodeInject$<$ T, U, V $>$}!rewrite\_pe\_file\_header@{rewrite\_pe\_file\_header}}
+\index{rewrite\_pe\_file\_header@{rewrite\_pe\_file\_header}!codeinject::inject::PeCodeInject$<$ T, U, V $>$@{codeinject::inject::PeCodeInject$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{rewrite\_pe\_file\_header()}{rewrite\_pe\_file\_header()}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+void \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject}{codeinject\+::inject\+::\+Pe\+Code\+Inject}}$<$ T, U, V $>$\+::rewrite\+\_\+pe\+\_\+file\+\_\+header}
+
+PE File Header 정보를 수정한다. 섹션의 수를 수정한다. \mbox{\Hypertarget{classcodeinject_1_1inject_1_1PeCodeInject_a711fa16dd8c5c51351c1b03ab7bc4b52}\label{classcodeinject_1_1inject_1_1PeCodeInject_a711fa16dd8c5c51351c1b03ab7bc4b52}} 
+\index{codeinject::inject::PeCodeInject$<$ T, U, V $>$@{codeinject::inject::PeCodeInject$<$ T, U, V $>$}!rewrite\_pe\_optional\_header@{rewrite\_pe\_optional\_header}}
+\index{rewrite\_pe\_optional\_header@{rewrite\_pe\_optional\_header}!codeinject::inject::PeCodeInject$<$ T, U, V $>$@{codeinject::inject::PeCodeInject$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{rewrite\_pe\_optional\_header()}{rewrite\_pe\_optional\_header()}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+void \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject}{codeinject\+::inject\+::\+Pe\+Code\+Inject}}$<$ T, U, V $>$\+::rewrite\+\_\+pe\+\_\+optional\+\_\+header}
+
+PE Optional Header 정보를 수정한다. EP, Size\+Of\+Image, DLLCharacteristic \mbox{\Hypertarget{classcodeinject_1_1inject_1_1PeCodeInject_a27e597fc5e0d6d5ca382470077d91a54}\label{classcodeinject_1_1inject_1_1PeCodeInject_a27e597fc5e0d6d5ca382470077d91a54}} 
+\index{codeinject::inject::PeCodeInject$<$ T, U, V $>$@{codeinject::inject::PeCodeInject$<$ T, U, V $>$}!write\_sections@{write\_sections}}
+\index{write\_sections@{write\_sections}!codeinject::inject::PeCodeInject$<$ T, U, V $>$@{codeinject::inject::PeCodeInject$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{write\_sections()}{write\_sections()}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+void \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject}{codeinject\+::inject\+::\+Pe\+Code\+Inject}}$<$ T, U, V $>$\+::write\+\_\+sections}
+
+섹션 헤더 정보를 추가한다. 
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classcodeinject_1_1inject_1_1PeCodeInject_a759cb02bc134830e09c301cb1b8719a6}\label{classcodeinject_1_1inject_1_1PeCodeInject_a759cb02bc134830e09c301cb1b8719a6}} 
+\index{codeinject::inject::PeCodeInject$<$ T, U, V $>$@{codeinject::inject::PeCodeInject$<$ T, U, V $>$}!m\_section\_alignment@{m\_section\_alignment}}
+\index{m\_section\_alignment@{m\_section\_alignment}!codeinject::inject::PeCodeInject$<$ T, U, V $>$@{codeinject::inject::PeCodeInject$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{m\_section\_alignment}{m\_section\_alignment}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+int \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject}{codeinject\+::inject\+::\+Pe\+Code\+Inject}}$<$ T, U, V $>$\+::m\+\_\+section\+\_\+alignment}
+
+section 정렬값 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+inject/inject.\+h\item 
+inject/inject.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,254 @@
+\hypertarget{classcodeinject_1_1binary_1_1PeBinary}{}\doxysection{codeinject\+::binary\+::Pe\+Binary\texorpdfstring{$<$}{<} T, U, V \texorpdfstring{$>$}{>} Class Template Reference}
+\label{classcodeinject_1_1binary_1_1PeBinary}\index{codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}}
+
+
+{\ttfamily \#include $<$binary.\+h$>$}
+
+Inheritance diagram for codeinject\+::binary\+::Pe\+Binary\texorpdfstring{$<$}{<} T, U, V \texorpdfstring{$>$}{>}\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classcodeinject_1_1binary_1_1PeBinary}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1PeBinary_ab077589cbcf2aa32eb2cad27e95a59cc}\label{classcodeinject_1_1binary_1_1PeBinary_ab077589cbcf2aa32eb2cad27e95a59cc}} 
+{\bfseries Pe\+Binary} (\mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary}{Pe\+Binary}} \&\&)=default
+\item 
+virtual void \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary_a61055bd8ba98ec51651d655c71a877cf}{parse\+\_\+every\+\_\+thing}} () override
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1PeBinary_a4a825611eeb63c0c021236e3fdefedb8}\label{classcodeinject_1_1binary_1_1PeBinary_a4a825611eeb63c0c021236e3fdefedb8}} 
+{\bfseries Pe\+Binary} (const \mbox{\hyperlink{classcodeinject_1_1binary_1_1BinaryParser}{Binary\+Parser}} \&parser)
+\item 
+void \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary_a5998dd302a0d311c63c19782b2c255e9}{parse\+\_\+dos\+\_\+header}} ()
+\item 
+void \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary_a77c8719d8e7ed318d43bc93bf553e272}{parse\+\_\+pe\+\_\+header}} ()
+\item 
+void \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary_a8e4fcad42c8af40b2417b06c2296857d}{parse\+\_\+section}} ()
+\item 
+virtual bool \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary_a681816de3bd78a634afa71f7110b0310}{edit\+\_\+section\+\_\+header}} (const \mbox{\hyperlink{classcodeinject_1_1binary_1_1Section}{Section}}$<$ T $>$ \&sec, Edit\+Mode mode) override
+\item 
+virtual bool \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary_a0710d5c1b59c7fcb674bbac934daeede}{edit\+\_\+section}} (const \mbox{\hyperlink{classcodeinject_1_1binary_1_1Section}{Section}}$<$ T $>$ \&sec, Edit\+Mode mode) override
+\item 
+bool \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary_a3c24fc1b0fe2be0bae6b0f194f6dc959}{edit\+\_\+pe\+\_\+header}} ()
+\item 
+bool \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary_aa0ba0a91469c9dccfc8623bfbd39f1d1}{edit\+\_\+dos\+\_\+header}} (const U \&dos\+\_\+header)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions inherited from \mbox{\hyperlink{classcodeinject_1_1binary_1_1BaseBinary}{codeinject\+::binary\+::\+Base\+Binary$<$ T $>$}}}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classcodeinject_1_1binary_1_1BaseBinary_a5415787ee073f62e1094cab0ea4c7347}{Base\+Binary}} (const \mbox{\hyperlink{classcodeinject_1_1binary_1_1BinaryParser}{Binary\+Parser}} \&parser)
+\item 
+virtual void \mbox{\hyperlink{classcodeinject_1_1binary_1_1BaseBinary_ab4b934effb45ede6740fcc55d5e42e7e}{parse\+\_\+every\+\_\+thing}} ()=0
+\item 
+\mbox{\hyperlink{classcodeinject_1_1binary_1_1Section}{Section}}$<$ T $>$ \& \mbox{\hyperlink{classcodeinject_1_1binary_1_1BaseBinary_ac98445634523aefe485d16d1ec582222}{get\+\_\+section}} (std\+::string)
+\item 
+virtual bool \mbox{\hyperlink{classcodeinject_1_1binary_1_1BaseBinary_abc54120afef2d1ac87a61d7d67d8f06e}{edit\+\_\+section\+\_\+header}} (const \mbox{\hyperlink{classcodeinject_1_1binary_1_1Section}{Section}}$<$ T $>$ \&sec, Edit\+Mode mode)=0
+\item 
+virtual bool \mbox{\hyperlink{classcodeinject_1_1binary_1_1BaseBinary_a84600f559f3aae672d7e111af03835b7}{edit\+\_\+section}} (const \mbox{\hyperlink{classcodeinject_1_1binary_1_1Section}{Section}}$<$ T $>$ \&sec, Edit\+Mode mode)=0
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions inherited from \mbox{\hyperlink{classcodeinject_1_1binary_1_1Bfd}{codeinject\+::binary\+::\+Bfd}}}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classcodeinject_1_1binary_1_1Bfd_a91f8b116e1703a267ce54f6768e072f1}{Bfd}} (std\+::string fname)
+\item 
+\mbox{\hyperlink{classcodeinject_1_1binary_1_1Bfd_a11e7960a6abbcb09edc4b7394c8e83a1}{Bfd}} (std\+::string fname, std\+::shared\+\_\+ptr$<$ bfd $>$ bfd\+\_\+h, Binary\+Type)
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1Bfd_a67c10fbcbbccf0ec93636947c7c9b23b}\label{classcodeinject_1_1binary_1_1Bfd_a67c10fbcbbccf0ec93636947c7c9b23b}} 
+{\bfseries Bfd} (std\+::string fname, Binary\+Type)
+\item 
+void \mbox{\hyperlink{classcodeinject_1_1binary_1_1Bfd_aa738d6ca53c556cede22a89fc7237e01}{open\+\_\+bfd}} ()
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions inherited from \mbox{\hyperlink{classcodeinject_1_1binary_1_1FileDescriptor}{codeinject\+::binary\+::\+File\+Descriptor}}}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1FileDescriptor_a51cbddf75dd3e951c097d3470a0d3c63}\label{classcodeinject_1_1binary_1_1FileDescriptor_a51cbddf75dd3e951c097d3470a0d3c63}} 
+{\bfseries File\+Descriptor} (const \mbox{\hyperlink{classcodeinject_1_1binary_1_1FileDescriptor}{File\+Descriptor}} \&)=delete
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1FileDescriptor_a1e1ca68caf6ecfa56c36016fcb5cb198}\label{classcodeinject_1_1binary_1_1FileDescriptor_a1e1ca68caf6ecfa56c36016fcb5cb198}} 
+\mbox{\hyperlink{classcodeinject_1_1binary_1_1FileDescriptor}{File\+Descriptor}} \& {\bfseries operator=} (const \mbox{\hyperlink{classcodeinject_1_1binary_1_1FileDescriptor}{File\+Descriptor}} \&)=delete
+\item 
+{\footnotesize template$<$typename S $>$ }\\S \mbox{\hyperlink{classcodeinject_1_1binary_1_1FileDescriptor_aa2f158cdc5d7f41105e1563944e0616f}{read\+\_\+data}} (int pos, int size)
+\item 
+{\footnotesize template$<$typename S $>$ }\\void \mbox{\hyperlink{classcodeinject_1_1binary_1_1FileDescriptor_aa88e121c98d8523c6ade1d1add977007}{write\+\_\+data}} (int pos, int size, const S \&struct\+\_\+data)
+\item 
+\mbox{\hyperlink{classcodeinject_1_1binary_1_1FileDescriptor_a5ca019f100229684367d1f6eadc6c0c4}{File\+Descriptor}} (std\+::string fname)
+\item 
+\mbox{\hyperlink{classcodeinject_1_1binary_1_1FileDescriptor_a503b3663c62167a6c555f724b3242ea1}{File\+Descriptor}} ()=default
+\item 
+void \mbox{\hyperlink{classcodeinject_1_1binary_1_1FileDescriptor_a5edd908d4a6bd5353d2177c46095f3a6}{set\+\_\+file\+\_\+name}} (std\+::string fname)
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1FileDescriptor_a483b1fc17e8dcf5b0ee6d1060dc17f5d}\label{classcodeinject_1_1binary_1_1FileDescriptor_a483b1fc17e8dcf5b0ee6d1060dc17f5d}} 
+int {\bfseries get\+\_\+file\+\_\+size} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::tuple$<$ U, int, int $>$ \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary_aa9d038c46da3c103c3d6b04bb7fbaa44}{m\+\_\+dos\+\_\+header}}
+\item 
+std\+::tuple$<$ V, int, int $>$ \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary_a1dce1c5c37a12896f777709321837e60}{m\+\_\+pe\+\_\+header}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes inherited from \mbox{\hyperlink{classcodeinject_1_1binary_1_1BaseBinary}{codeinject\+::binary\+::\+Base\+Binary$<$ T $>$}}}
+\begin{DoxyCompactItemize}
+\item 
+std\+::vector$<$ \mbox{\hyperlink{classcodeinject_1_1binary_1_1Section}{Section}}$<$ T $>$ $>$ \mbox{\hyperlink{classcodeinject_1_1binary_1_1BaseBinary_a1a14931046ebb0b0b9f18db99173823a}{m\+\_\+sections}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes inherited from \mbox{\hyperlink{classcodeinject_1_1binary_1_1Bfd}{codeinject\+::binary\+::\+Bfd}}}
+\begin{DoxyCompactItemize}
+\item 
+Binary\+Type \mbox{\hyperlink{classcodeinject_1_1binary_1_1Bfd_ae2ad84f7fc94200f4c5400f617cf62d8}{m\+\_\+binary\+\_\+type}}
+\item 
+std\+::shared\+\_\+ptr$<$ bfd $>$ \mbox{\hyperlink{classcodeinject_1_1binary_1_1Bfd_a80297736f992ffb75521954677ea98d4}{m\+\_\+bfd\+\_\+h}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes inherited from \mbox{\hyperlink{classcodeinject_1_1binary_1_1FileDescriptor}{codeinject\+::binary\+::\+File\+Descriptor}}}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \mbox{\hyperlink{classcodeinject_1_1binary_1_1FileDescriptor_a72f2dbfb1da82b19aa0373261e375634}{m\+\_\+fname}}
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1FileDescriptor_a41cf1516d2f33b4b230ed9d906354d47}\label{classcodeinject_1_1binary_1_1FileDescriptor_a41cf1516d2f33b4b230ed9d906354d47}} 
+std\+::fstream {\bfseries m\+\_\+file\+\_\+stream}
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+\doxysubsubsection*{Static Public Attributes inherited from \mbox{\hyperlink{classcodeinject_1_1binary_1_1Bfd}{codeinject\+::binary\+::\+Bfd}}}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1Bfd_ac0211818a88b3b53904af32335b227e0}\label{classcodeinject_1_1binary_1_1Bfd_ac0211818a88b3b53904af32335b227e0}} 
+static int {\bfseries bfd\+\_\+inited} = 0
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$typename T, typename U, typename V$>$\newline
+class codeinject\+::binary\+::\+Pe\+Binary$<$ T, U, V $>$}
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & \doxylink{classcodeinject_1_1binary_1_1Section}{Section} Header \\
+\hline
+{\em U} & DOS Header \\
+\hline
+{\em V} & PE Header \\
+\hline
+\end{DoxyTemplParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1PeBinary_aa0ba0a91469c9dccfc8623bfbd39f1d1}\label{classcodeinject_1_1binary_1_1PeBinary_aa0ba0a91469c9dccfc8623bfbd39f1d1}} 
+\index{codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}!edit\_dos\_header@{edit\_dos\_header}}
+\index{edit\_dos\_header@{edit\_dos\_header}!codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{edit\_dos\_header()}{edit\_dos\_header()}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+bool \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary}{codeinject\+::binary\+::\+Pe\+Binary}}$<$ T, U, V $>$\+::edit\+\_\+dos\+\_\+header (\begin{DoxyParamCaption}\item[{const U \&}]{dos\+\_\+header }\end{DoxyParamCaption})}
+
+DOS HEADER를 수정한다. 
+\begin{DoxyParams}{Parameters}
+{\em dos\+\_\+header} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1PeBinary_a3c24fc1b0fe2be0bae6b0f194f6dc959}\label{classcodeinject_1_1binary_1_1PeBinary_a3c24fc1b0fe2be0bae6b0f194f6dc959}} 
+\index{codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}!edit\_pe\_header@{edit\_pe\_header}}
+\index{edit\_pe\_header@{edit\_pe\_header}!codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{edit\_pe\_header()}{edit\_pe\_header()}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+bool \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary}{codeinject\+::binary\+::\+Pe\+Binary}}$<$ T, U, V $>$\+::edit\+\_\+pe\+\_\+header}
+
+PE HEADER를 수정한다. 
+\begin{DoxyParams}{Parameters}
+{\em pe\+\_\+header} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1PeBinary_a0710d5c1b59c7fcb674bbac934daeede}\label{classcodeinject_1_1binary_1_1PeBinary_a0710d5c1b59c7fcb674bbac934daeede}} 
+\index{codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}!edit\_section@{edit\_section}}
+\index{edit\_section@{edit\_section}!codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{edit\_section()}{edit\_section()}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+bool \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary}{codeinject\+::binary\+::\+Pe\+Binary}}$<$ T, U, V $>$\+::edit\+\_\+section (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classcodeinject_1_1binary_1_1Section}{Section}}$<$ T $>$ \&}]{sec,  }\item[{Edit\+Mode}]{mode }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+
+
+Implements \mbox{\hyperlink{classcodeinject_1_1binary_1_1BaseBinary}{codeinject\+::binary\+::\+Base\+Binary$<$ T $>$}}.
+
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1PeBinary_a681816de3bd78a634afa71f7110b0310}\label{classcodeinject_1_1binary_1_1PeBinary_a681816de3bd78a634afa71f7110b0310}} 
+\index{codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}!edit\_section\_header@{edit\_section\_header}}
+\index{edit\_section\_header@{edit\_section\_header}!codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{edit\_section\_header()}{edit\_section\_header()}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+bool \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary}{codeinject\+::binary\+::\+Pe\+Binary}}$<$ T, U, V $>$\+::edit\+\_\+section\+\_\+header (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classcodeinject_1_1binary_1_1Section}{Section}}$<$ T $>$ \&}]{sec,  }\item[{Edit\+Mode}]{mode }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+실제 Section의 정보를 수정한다.(파일에도 적용됨) 
+\begin{DoxyParams}{Parameters}
+{\em sec\+\_\+name} & target Section의 이름 \\
+\hline
+{\em sec} & 수정한 section의 정보 \\
+\hline
+{\em mode} & 수정, 삽입 \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+수정한 Section$<$\+T$>$ 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{classcodeinject_1_1binary_1_1BaseBinary_abc54120afef2d1ac87a61d7d67d8f06e}{codeinject\+::binary\+::\+Base\+Binary$<$ T $>$}}.
+
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1PeBinary_a5998dd302a0d311c63c19782b2c255e9}\label{classcodeinject_1_1binary_1_1PeBinary_a5998dd302a0d311c63c19782b2c255e9}} 
+\index{codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}!parse\_dos\_header@{parse\_dos\_header}}
+\index{parse\_dos\_header@{parse\_dos\_header}!codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{parse\_dos\_header()}{parse\_dos\_header()}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+void \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary}{codeinject\+::binary\+::\+Pe\+Binary}}$<$ T, U, V $>$\+::parse\+\_\+dos\+\_\+header}
+
+dos header를 파싱한다. \mbox{\Hypertarget{classcodeinject_1_1binary_1_1PeBinary_a61055bd8ba98ec51651d655c71a877cf}\label{classcodeinject_1_1binary_1_1PeBinary_a61055bd8ba98ec51651d655c71a877cf}} 
+\index{codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}!parse\_every\_thing@{parse\_every\_thing}}
+\index{parse\_every\_thing@{parse\_every\_thing}!codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{parse\_every\_thing()}{parse\_every\_thing()}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+void \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary}{codeinject\+::binary\+::\+Pe\+Binary}}$<$ T, U, V $>$\+::parse\+\_\+every\+\_\+thing (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+나머지 바이너리에 필요한 모든 정보를 파싱한다. 
+
+Implements \mbox{\hyperlink{classcodeinject_1_1binary_1_1BaseBinary_ab4b934effb45ede6740fcc55d5e42e7e}{codeinject\+::binary\+::\+Base\+Binary$<$ T $>$}}.
+
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1PeBinary_a77c8719d8e7ed318d43bc93bf553e272}\label{classcodeinject_1_1binary_1_1PeBinary_a77c8719d8e7ed318d43bc93bf553e272}} 
+\index{codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}!parse\_pe\_header@{parse\_pe\_header}}
+\index{parse\_pe\_header@{parse\_pe\_header}!codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{parse\_pe\_header()}{parse\_pe\_header()}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+void \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary}{codeinject\+::binary\+::\+Pe\+Binary}}$<$ T, U, V $>$\+::parse\+\_\+pe\+\_\+header}
+
+pe header를 파싱한다. \mbox{\Hypertarget{classcodeinject_1_1binary_1_1PeBinary_a8e4fcad42c8af40b2417b06c2296857d}\label{classcodeinject_1_1binary_1_1PeBinary_a8e4fcad42c8af40b2417b06c2296857d}} 
+\index{codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}!parse\_section@{parse\_section}}
+\index{parse\_section@{parse\_section}!codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{parse\_section()}{parse\_section()}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+void \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary}{codeinject\+::binary\+::\+Pe\+Binary}}$<$ T, U, V $>$\+::parse\+\_\+section}
+
+section, section header를 파싱한다. 
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{classcodeinject_1_1binary_1_1PeBinary_aa9d038c46da3c103c3d6b04bb7fbaa44}\label{classcodeinject_1_1binary_1_1PeBinary_aa9d038c46da3c103c3d6b04bb7fbaa44}} 
+\index{codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}!m\_dos\_header@{m\_dos\_header}}
+\index{m\_dos\_header@{m\_dos\_header}!codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{m\_dos\_header}{m\_dos\_header}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+std\+::tuple$<$U, int, int$>$ \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary}{codeinject\+::binary\+::\+Pe\+Binary}}$<$ T, U, V $>$\+::m\+\_\+dos\+\_\+header}
+
+DOS Header, file offset, file size \mbox{\Hypertarget{classcodeinject_1_1binary_1_1PeBinary_a1dce1c5c37a12896f777709321837e60}\label{classcodeinject_1_1binary_1_1PeBinary_a1dce1c5c37a12896f777709321837e60}} 
+\index{codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}!m\_pe\_header@{m\_pe\_header}}
+\index{m\_pe\_header@{m\_pe\_header}!codeinject::binary::PeBinary$<$ T, U, V $>$@{codeinject::binary::PeBinary$<$ T, U, V $>$}}
+\doxysubsubsection{\texorpdfstring{m\_pe\_header}{m\_pe\_header}}
+{\footnotesize\ttfamily template$<$typename T , typename U , typename V $>$ \\
+std\+::tuple$<$V, int, int$>$ \mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary}{codeinject\+::binary\+::\+Pe\+Binary}}$<$ T, U, V $>$\+::m\+\_\+pe\+\_\+header}
+
+PE Header, file offset, file size 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+binary/binary.\+h\item 
+binary/binary.\+cpp\end{DoxyCompactItemize}

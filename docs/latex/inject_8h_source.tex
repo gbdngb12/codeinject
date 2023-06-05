@@ -1,0 +1,91 @@
+\hypertarget{inject_8h_source}{}\doxysection{inject.\+h}
+\label{inject_8h_source}\index{inject/inject.h@{inject/inject.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#include\ <vector>}}
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#include\ "{}binary.h"{}}}
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <cstdint>}}
+\DoxyCodeLine{00005\ \textcolor{keyword}{namespace\ }codeinject::inject\ \{}
+\DoxyCodeLine{00006\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject}{CodeInject}}\ \{}
+\DoxyCodeLine{00007\ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00008\ \ \ std::vector<uint8\_t>\ m\_code;}
+\DoxyCodeLine{00012\ \ \ std::string\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject_a305d115f40fbaaafcb6dcc0b80c8dc0f}{m\_inject\_section\_name}};}
+\DoxyCodeLine{00016\ \ \ std::string\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject_a06aeb52981ae8e6174c176976664d320}{m\_target\_section\_name}};}
+\DoxyCodeLine{00020\ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject_a058f6daca07a7402567f5fc57f72f0a4}{m\_inject\_offset}};}
+\DoxyCodeLine{00024\ \ \ \textcolor{keywordtype}{size\_t}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject_a8a19d582b199d7c87672e8e89907dac5}{m\_inject\_vaddr}};}
+\DoxyCodeLine{00028\ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject_a02314ba53abe30ca30dee9c9b0d56167}{m\_inject\_size}};}
+\DoxyCodeLine{00029\ }
+\DoxyCodeLine{00033\ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject_a6712450bbd1d16953f61353daec545ba}{m\_inject\_index}};}
+\DoxyCodeLine{00034\ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ inject\_code()\ =\ 0;}
+\DoxyCodeLine{00035\ \ \ \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject}{CodeInject}}(std::vector<uint8\_t>,\ std::string\ inject\_name,\ std::string\ target\_name);}
+\DoxyCodeLine{00036\ \};}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T,\ \textcolor{keyword}{typename}\ U,\ \textcolor{keyword}{typename}\ V>}
+\DoxyCodeLine{00039\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject}{PeCodeInject}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject}{CodeInject}}\ \{}
+\DoxyCodeLine{00040\ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00041\ \ \ \textcolor{keyword}{enum\ class}\ SectionFlag\ \{}
+\DoxyCodeLine{00042\ \ \ \ \ IMAGE\_SCN\_CNT\_INITIALIZED\_DATA\ =\ 0x00000040,}
+\DoxyCodeLine{00043\ \ \ \ \ IMAGE\_SCN\_MEM\_READ\ =\ 0x40000000,}
+\DoxyCodeLine{00044\ \ \ \ \ IMAGE\_SCN\_MEM\_EXECUTE\ =\ 0x20000000}
+\DoxyCodeLine{00045\ \ \ \};}
+\DoxyCodeLine{00046\ \ \ \textcolor{keyword}{enum\ class}\ DLLCharacteristics\ \{}
+\DoxyCodeLine{00047\ \ \ \ \ IMAGE\_DLLCHARACTERISTICS\_DYNAMIC\_BASE\ =\ 0x0040,}
+\DoxyCodeLine{00048\ \ \ \ \ IMAGE\_DLLCHARACTERISTICS\_GUARD\_CF\ =\ 0x4000,}
+\DoxyCodeLine{00049\ \ \ \ \ IMAGE\_DLLCHARACTERISTICS\_NX\_COMPAT\ =\ 0x0100}
+\DoxyCodeLine{00050\ \ \ \};}
+\DoxyCodeLine{00054\ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject_a759cb02bc134830e09c301cb1b8719a6}{m\_section\_alignment}};}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00056\ \ \ std::shared\_ptr<codeinject::binary::PeBinary<T,\ U,\ V>>\ m\_pe\_binary\_ptr;}
+\DoxyCodeLine{00057\ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ inject\_code()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00058\ \ \ \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject}{PeCodeInject}}(std::shared\_ptr<\mbox{\hyperlink{classcodeinject_1_1binary_1_1PeBinary}{codeinject::binary::PeBinary<T,\ U,\ V>}}>,\ std::vector<uint8\_t>\ \mbox{\hyperlink{classcodeinject_1_1binary_1_1CodeBinary}{code}});}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \ \ \textcolor{keywordtype}{int}\ calc\_alignment(\textcolor{keywordtype}{int});}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00065\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject_a27e597fc5e0d6d5ca382470077d91a54}{write\_sections}}();}
+\DoxyCodeLine{00066\ }
+\DoxyCodeLine{00071\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject_a711fa16dd8c5c51351c1b03ab7bc4b52}{rewrite\_pe\_optional\_header}}();}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00077\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject_a708d7d8dffc3ec026b28070a4c50d05b}{rewrite\_pe\_file\_header}}();}
+\DoxyCodeLine{00078\ \};}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00080\ \textcolor{keyword}{template}<\textcolor{keyword}{typename}\ T,\ \textcolor{keyword}{typename}\ U,\ \textcolor{keyword}{typename}\ V>}
+\DoxyCodeLine{00081\ \textcolor{keyword}{class\ }\mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject}{ElfCodeInject}}\ :\ \textcolor{keyword}{public}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1CodeInject}{CodeInject}}\ \{}
+\DoxyCodeLine{00082\ \ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00086\ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject_acfd9e5cf20f07b8c0d5dcc29bf7e7512}{m\_program\_header\_index}};}
+\DoxyCodeLine{00087\ }
+\DoxyCodeLine{00091\ \ \ \textcolor{keywordtype}{int}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject_a4fa95bf04568136acd369533ccc03f08}{m\_name\_index}};}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ \ \ std::shared\_ptr<codeinject::binary::ElfBinary<T,\ U,\ V>>\ m\_elf\_binary\_ptr;}
+\DoxyCodeLine{00094\ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{bool}\ inject\_code()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00095\ \ \ \mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject}{ElfCodeInject}}(std::shared\_ptr<\mbox{\hyperlink{classcodeinject_1_1binary_1_1ElfBinary}{codeinject::binary::ElfBinary<T,\ U,\ V>}}>,}
+\DoxyCodeLine{00096\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ std::vector<uint8\_t>\ \mbox{\hyperlink{classcodeinject_1_1binary_1_1CodeBinary}{code}},}
+\DoxyCodeLine{00097\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{size\_t}\ address);}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00103\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject_a738ff5a19001dfce1d5bc2be8b92717d}{find\_rewriteable\_segment}}();}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00108\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject_a09122c063e2aaeb1291c154b1d494a1f}{write\_code}}();}
+\DoxyCodeLine{00109\ }
+\DoxyCodeLine{00113\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject_ad993aaacb60f02121642ea1498af33a4}{align\_code}}();}
+\DoxyCodeLine{00114\ }
+\DoxyCodeLine{00118\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject_a85ffc80b7cda419f6091c84d5e552f4a}{rewrite\_code\_section}}();}
+\DoxyCodeLine{00119\ }
+\DoxyCodeLine{00123\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject_aa4f50ac31ee0cfdb26067a40bee63fbd}{reorder\_shdrs}}();}
+\DoxyCodeLine{00124\ }
+\DoxyCodeLine{00128\ \ \ \textcolor{comment}{//void\ calc\_vaddr();}}
+\DoxyCodeLine{00129\ }
+\DoxyCodeLine{00133\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject_a42083348c8a8255b2aaff4f794a7ff49}{rewrite\_section\_name}}();}
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00138\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject_a7115cf4a05ba61819b10d6bc842d3fef}{rewrite\_code\_segment}}();}
+\DoxyCodeLine{00139\ }
+\DoxyCodeLine{00143\ \ \ \textcolor{keywordtype}{void}\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject_a1ce77fd4fbff34aa98ba59ab26bbdf45}{rewrite\_entry\_point}}();}
+\DoxyCodeLine{00144\ }
+\DoxyCodeLine{00145\ \};}
+\DoxyCodeLine{00146\ \};}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00148\ \textcolor{keyword}{using\ }\mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject}{pe\_64\_codeinject}}\ =\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject}{codeinject::inject::PeCodeInject<PE\_SECTION\_HEADER,\ PE\_DOS\_HEADER,\ PE64\_HEADERS>}};}
+\DoxyCodeLine{00149\ \textcolor{keyword}{using\ }\mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject}{pe\_32\_codeinject}}\ =\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1PeCodeInject}{codeinject::inject::PeCodeInject<PE\_SECTION\_HEADER,\ PE\_DOS\_HEADER,\ PE32\_HEADERS>}};}
+\DoxyCodeLine{00150\ \textcolor{keyword}{using\ }\mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject}{elf\_32\_codeinject}}\ =\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject}{codeinject::inject::ElfCodeInject<Elf32\_Shdr,\ Elf32\_Ehdr,\ Elf32\_Phdr>}};}
+\DoxyCodeLine{00151\ \textcolor{keyword}{using\ }\mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject}{elf\_64\_codeinject}}\ =\ \mbox{\hyperlink{classcodeinject_1_1inject_1_1ElfCodeInject}{codeinject::inject::ElfCodeInject<Elf64\_Shdr,\ Elf64\_Ehdr,\ Elf64\_Phdr>}};}
+
+\end{DoxyCode}
