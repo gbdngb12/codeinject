@@ -15,7 +15,7 @@ if(TEST_CASE)
     add_subdirectory("test_code")
 endif()
 
-if(!TEST_CASE)
+if(NOT TEST_CASE)
     add_executable(${PROJECT_NAME} "codeinject.cpp" codeinject.cpp)
 
     target_link_libraries(${PROJECT_NAME}
