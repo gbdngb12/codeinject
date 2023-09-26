@@ -34,6 +34,7 @@ void PeCodeInject<T, U, V>::write_sections() {
   // SizeOfRawData = 삽입한 코드의 크기
   // PointerToRawData = 삽입한 코드의 위치
   // 특성 = 실행 가능 코드 | 초기화 데이터 | 읽기 가능 섹션
+  auto &pe_optional_header = std::get<0>(this->m_pe_binary_ptr->m_pe_header).OptionalHeader;
   binary::Section<T> sec{};
   sec.m_section_name = this->m_inject_section_name;
   sec.m_section = std::make_tuple(m_code, m_inject_offset, m_inject_size);
@@ -42,7 +43,7 @@ void PeCodeInject<T, U, V>::write_sections() {
   section_header.Misc.VirtualSize = m_inject_size;
   this->m_inject_vaddr = calc_alignment(
       std::get<0>(this->m_pe_binary_ptr->m_sections.back().m_section_header).VirtualAddress
-          + std::get<0>(this->m_pe_binary_ptr->m_sections.back().m_section_header).Misc.VirtualSize);
+          + std::get<0>(this->m_pe_binary_ptr->m_sections.back().m_section_header).Misc.VirtualSize, pe_optional_header.SectionAlignment);
   section_header.VirtualAddress = this->m_inject_vaddr;
   section_header.SizeOfRawData = this->m_inject_size;
   section_header.PointerToRawData = this->m_inject_offset;
@@ -56,8 +57,8 @@ void PeCodeInject<T, U, V>::write_sections() {
   this->m_pe_binary_ptr->edit_section_header(std::move(sec), binary::EditMode::APPEND);
 }
 template<typename T, typename U, typename V>
-int PeCodeInject<T, U, V>::calc_alignment(int value) {
-  return value + m_section_alignment - value % m_section_alignment;
+int PeCodeInject<T, U, V>::calc_alignment(int value, int alignment_value) {
+  return value + alignment_value - value % alignment_value;
 }
 template<typename T, typename U, typename V>
 void PeCodeInject<T, U, V>::rewrite_pe_header() {
@@ -67,7 +68,7 @@ void PeCodeInject<T, U, V>::rewrite_pe_header() {
   // rewrite pe optional header
   auto &pe_optional_header = std::get<0>(this->m_pe_binary_ptr->m_pe_header).OptionalHeader;
   pe_optional_header.AddressOfEntryPoint = this->m_inject_vaddr; //EP
-  pe_optional_header.SizeOfImage = calc_alignment(m_inject_vaddr + m_inject_size); //전체 크기
+  pe_optional_header.SizeOfImage = calc_alignment(m_inject_vaddr + m_inject_size, pe_optional_header.SectionAlignment); //전체 크기
   pe_optional_header.DllCharacteristics &= ~(static_cast<int>(DLLCharacteristics::IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE)
       | static_cast<int>(DLLCharacteristics::IMAGE_DLLCHARACTERISTICS_GUARD_CF)
       | static_cast<int>(DLLCharacteristics::IMAGE_DLLCHARACTERISTICS_NX_COMPAT));// 메모리 보호 기법 제거
@@ -77,15 +78,17 @@ void PeCodeInject<T, U, V>::rewrite_pe_header() {
 template<typename T, typename U, typename V>
 void PeCodeInject<T, U, V>::rewrite_pe_file_header() {
   // NumberOfSection 한개 증가
-  //this->m_pe_binary_ptr->edit_pe_header();// 실제 값 수정
   auto &pe_file_header = std::get<0>(this->m_pe_binary_ptr->m_pe_header).FileHeader;
   pe_file_header.NumberOfSections++;
 }
 template<typename T, typename U, typename V>
 PeCodeInject<T, U, V>::PeCodeInject(std::shared_ptr<binary::PeBinary<T, U, V>> pe_binary, std::vector<uint8_t> code)
     : m_pe_binary_ptr{pe_binary}, CodeInject(std::move(code), ".inject", ""/*일단 비움(섹션 추가이므로)*/) {
-  this->m_inject_size = this->m_code.size();
-  this->m_inject_offset = this->m_pe_binary_ptr->get_file_size();
+  auto file_alignment = std::get<0>(this->m_pe_binary_ptr->m_pe_header).OptionalHeader.FileAlignment;
+  this->m_inject_size = calc_alignment(this->m_code.size(), file_alignment);
+  // @todo file offset 보정 필요!
+  this->m_inject_offset = calc_alignment(this->m_pe_binary_ptr->get_file_size(), file_alignment);
+  std::cout << std::hex <<this->m_inject_offset << "\n";
   this->m_section_alignment = std::get<0>(this->m_pe_binary_ptr->m_pe_header).OptionalHeader.SectionAlignment;
 }
 

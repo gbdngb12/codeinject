@@ -57,7 +57,7 @@ class PeCodeInject : public CodeInject {
   virtual bool inject_code() override;
   PeCodeInject(std::shared_ptr<codeinject::binary::PeBinary<T, U, V>>, std::vector<uint8_t> code);
 
-  int calc_alignment(int);
+  int calc_alignment(int,int);
 
   /**
    * 섹션 헤더 정보를 추가한다.

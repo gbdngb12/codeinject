@@ -224,10 +224,16 @@ bool PeBinary<T, U, V>::edit_section_header(const Section<T> &sec, EditMode mode
       this->template write_data<T>(std::get<1>(this->m_sections.back().m_section_header),
                                    std::get<2>(this->m_sections.back().m_section_header),
                                    std::get<0>(this->m_sections.back().m_section_header));
+      auto pos = std::get<1>(this->m_sections.back().m_section);
+      auto file_size = this->get_file_size();
+      std::vector<uint8_t> nop(pos - file_size, 0x90);
+      this->template write_data<std::vector<uint8_t>>(file_size/* pos */,
+                                                      pos - file_size/* size */,
+                                                      nop/* data */);
       // 2.section 정보를 파일에 쓴다.
-      this->template write_data<std::vector<uint8_t>>(std::get<1>(this->m_sections.back().m_section),
-                                                      std::get<2>(this->m_sections.back().m_section),
-                                                      std::get<0>(this->m_sections.back().m_section));
+      this->template write_data<std::vector<uint8_t>>(pos/* pos */,
+                                                      std::get<2>(this->m_sections.back().m_section)/* size */,
+                                                      std::get<0>(this->m_sections.back().m_section)/* data */);
       return true;
     } else {
       std::cerr << std::format("Failed to insert Section to Binary {}\n", this->m_fname);
