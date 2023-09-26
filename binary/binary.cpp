@@ -227,6 +227,8 @@ bool PeBinary<T, U, V>::edit_section_header(const Section<T> &sec, EditMode mode
       auto pos = std::get<1>(this->m_sections.back().m_section);
       auto file_size = this->get_file_size();
       std::vector<uint8_t> nop(pos - file_size, 0x90);
+      std::cout << "file size :" << std::hex << file_size<<"\n";
+      std::cout << "size :" << std::hex << pos - file_size<<"\n";
       this->template write_data<std::vector<uint8_t>>(file_size/* pos */,
                                                       pos - file_size/* size */,
                                                       nop/* data */);

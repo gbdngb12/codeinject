@@ -85,7 +85,7 @@ template<typename T, typename U, typename V>
 PeCodeInject<T, U, V>::PeCodeInject(std::shared_ptr<binary::PeBinary<T, U, V>> pe_binary, std::vector<uint8_t> code)
     : m_pe_binary_ptr{pe_binary}, CodeInject(std::move(code), ".inject", ""/*일단 비움(섹션 추가이므로)*/) {
   auto file_alignment = std::get<0>(this->m_pe_binary_ptr->m_pe_header).OptionalHeader.FileAlignment;
-  this->m_inject_size = calc_alignment(this->m_code.size(), file_alignment);
+  this->m_inject_size = this->m_code.size();
   // @todo file offset 보정 필요!
   this->m_inject_offset = calc_alignment(this->m_pe_binary_ptr->get_file_size(), file_alignment);
   std::cout << std::hex <<this->m_inject_offset << "\n";
